@@ -5,13 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
 
+        .main_container{
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .sidebar{
+            height: 92%;
+            width: 15%;
+            background: #DEC1A7;
+            margin: 0;
+            position: relative;
+            top: 78px;
+            z-index: 1;
+        }
+        .content{
+            width: 85%;
+            height: 99,99%;
+            border: 1px solid black;
+        }
+        #header{
+            position: relative;
+            z-index: 2;
+        }
+    </style>
 </head>
 <body>
-    <div class="Container" style="width: 100%; height: 100%">
+    <div id="header"></div>
+    <div class="main_container">
         <!-- Ajouter le Header ici -->
-        <div id="header"></div>
-        <div class="Rectangle3" style="width: 131px; height: 570px; left: 0px; top: 79px; position: absolute; background: #F0E6CC"></div>
+        <div class="sidebar">
+
+        </div>
+        <div class="content">
+
+        </div>
+        <!-- <div class="Rectangle3" style="width: 131px; height: 570px; left: 0px; top: 79px; position: absolute; background: #F0E6CC"></div>
         <div class="Rectangle23" style="width: 131px; height: 570px; left: 0px; top: 79px; position: absolute; background: #F0E6CC"></div>
         <div class="Rectangle4" style="width: 886px; height: 61px; left: 0px; top: 649px; position: absolute; background: #252121"></div>
         <div class="Rectangle11" style="width: 131px; height: 39px; left: 0px; top: 215px; position: absolute; background: #DEC1A7"></div>
@@ -32,7 +70,7 @@
         <div class="Rectangle10" style="width: 35px; height: 26px; left: 130px; top: 80px; position: absolute; background: black"></div>
         <div class="List2" style="width: 32px; height: 32px; left: 133px; top: 77px; position: absolute">
           <div class="Vector" style="width: 22px; height: 18px; left: 5px; top: 7px; position: absolute; background: white"></div>
-        </div>
+        </div> -->
       </div>
 
     <script>
