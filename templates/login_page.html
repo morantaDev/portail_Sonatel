@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Inclure le fichier CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../styles/login_page.css">
+    <title>Login page</title>
+
+    <style>
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0; /* Pour enlever les marges par défaut du body */
+        padding: 0;
+    }
+    .container {
+        height: 100vh; /* 100% de la hauteur de la vue */
+        position: relative; /* Position relative pour positionner les éléments enfants */
+        padding: 0; /* Supprimer le padding pour utiliser toute la hauteur */
+        border: 1px solid black;
+    }
+    .sonatel1_logo {
+        background: url('../assets/SONATEL.jpg') center/cover no-repeat; /* Utiliser l'image comme fond */
+        height: 100%; /* Utiliser toute la hauteur du conteneur */
+        width: 100%;
+        background-size: cover;
+    }
+    .login_page {
+        position: absolute; /* Position absolue par rapport au conteneur parent */
+        top: 50%; /* Positionner au centre verticalement */
+        left: 50%; /* Positionner au centre horizontalement */
+        transform: translate(-50%, -50%); /* Ajuster pour centrer parfaitement */
+        padding: 20px; /* Ajout de padding pour l'espace intérieur */
+        background-color: rgba(255, 255, 255, 0.5); /* Fond semi-transparent pour le formulaire */
+        border-radius: 10px; /* Ajouter des coins arrondis */
+        width: 50%;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sonatel1_logo"></div>
+        <div class="login_page">
+            <h3>Login</h3>
+            <div class="form-group">
+                <label for="UserName">Nom d’utilisateur</label>
+                <input type="text" class="form-control" id="UserName" name="UserName" placeholder="Entrer le nom d'utilisateur ou Email" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="MotDePasse">Mot de passe</label>
+                <input type="password" class="form-control" id="MotDePasse" name="MotDePasse" placeholder="Entrer le mot de passe" autocomplete="current-password">
+            </div>
+            <div class="Connexion">
+                <button type="button" class="btn btn-primary btn-lg">Connexion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inclure le fichier JavaScript de Bootstrap si nécessaire -->
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> -->
+</body>
+</html>
