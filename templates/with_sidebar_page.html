@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>Main page</title>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
         <style>
             body {
@@ -43,6 +43,11 @@
                 position: absolute;
                 transition: left 0.3s;
             }
+            .content{
+                width: 100%;
+                /* border: 1px solid black; */
+
+            }
             .sidebar h1{
                 text-align: center;
                 background-color: #caa27f;
@@ -57,7 +62,7 @@
                 text-align: center;
                 margin: 20px 0;
                 padding: 20px;
-                font-size: 20px;
+                font-size: 17px;
                 transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
                 width: 100%;
                 font-weight: bold;
@@ -66,10 +71,17 @@
                 cursor: pointer;
                 background-color: #492809;
                 color: white;
+                font-size: 20px;
             }
-            .content .collapsed {
+            .open .content{
+                width:  100%;
+            }
+            .content.collapsed {
                 width: calc(100% - 250px); /* Ajustez la largeur en fonction de la largeur du sidebar ouvert */
                 left: 250px;
+                margin-left: 250px;
+                /* transition: left 0.3s; */
+
             }
             .open {
                 left: 0; /* Ajustez la position lorsque le sidebar est ouvert */
@@ -85,13 +97,16 @@
                 position: absolute;/* Met le pied de page en bas de son contenant */ 
                 background-color: black;
             }
+            .footer p { 
+                padding-top: 30px;
+            }
             #list_button svg {
                 color: white;
                 position: relative;
-                top: 7px;
+                top: -10%;
                 background-color:#492809;
-                left: 235px;
-                padding: 10px;
+                left: 227px;
+                padding: 10px 5px 10px 20px;
                 border-radius: 50%;
             }
         </style>
@@ -138,9 +153,8 @@
 
                 $("#list_button").on('click', function(){
                     $(".sidebar").toggleClass("open");
-                    // alert('salut')
-                //     $(".content").toggleClass("collapsed");
-                //     $("#list_button").toggleClass("open");
+                    $(".content").toggleClass("collapsed");
+                    $("#list_button").toggleClass("open");
                 });
             });
 
