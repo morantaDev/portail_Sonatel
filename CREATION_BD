@@ -1,0 +1,14 @@
+ALTER USER Portail_Facturation_S WITH PASSWORD 'sonatel';
+
+#pour localiser le chemin postgres
+
+locate postgresql.conf
+locate postgresql.conf
+/etc/postgresql/15/main/postgresql.conf
+/usr/share/postgresql/15/postgresql.conf.sample
+
+
+/etc/postgresql/15/main/pg_hba.conf
+
+portail_facturation_s
+facturations
