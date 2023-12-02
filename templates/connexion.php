@@ -1,15 +1,15 @@
 <?php
+    session_start();
     #Connexion to de database
     $HOST = "localhost";
     $PORT = "5432";
     $DBNAME = "sms_pro_database";
-    $PASSWORD = "";
+    $PWD = "Wizzle21#";
     try {
-        $connect = pg_connect("host=localhost port=5432 dbname=$ password=''");
-        echo "connexion établie";
-        header ("Location : with_sidebar_page.html")
-
+        $dsn = "pgsql:host=$HOST;port=$PORT;dbname=$DBNAME;user=moranta;password=$PWD";
+        $db = new PDO($dsn);
     } catch (Exception $e) {
         Echo $e->getMessage();
     }
 ?>
+
