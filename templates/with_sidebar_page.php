@@ -4,7 +4,7 @@
     // Vérifier si UserName est présent dans la session
     if (!isset($_SESSION['UserName'])) {
         // Rediriger vers la page de connexion si UserName n'est pas présent
-        header("Location: login_page.html");
+        header("Location: index.html");
         exit();
     }
 
@@ -193,7 +193,7 @@
         }
         .userName{
             color: white;
-            margin-left: 5px;
+            margin-left: 10px;
             padding-top: 30px;
             font-size: 17px;
             width: 20%;
@@ -209,6 +209,9 @@
         .userName span{
             color: white;
             font-size: 20px;
+        }
+        .getFiles{
+            display: none;
         }
 </style>
 </head>
@@ -264,6 +267,9 @@
         <div class="content">
             <!-- Toutes les tableaux seront affichés içi -->
             <p><?php echo "Bienvenue" ." ".$UserName ;?></p>
+            <div class="getFiles">
+                <?php include "saly.html"; ?>
+            </div>
         </div>
     </div>
 
@@ -275,17 +281,23 @@
     $(document).ready(function(){
         console.log("Chargement de la page terminé.");
 
-//        $("#header").load('header.html', function(response, status, xhr){
-//            if(status == "error") {
-//                console.log("Erreur de chargement du fichier d'en-tête : " + xhr.status + " " + xhr.statusText);
-//           }
-//        });
 
         $("#list_button").on('click', function(){
             $(".sidebar").toggleClass("open");
             $(".content").toggleClass("collapsed");
             $("#list_button").toggleClass("open");
         });
+
+        $(".menu_list li").click(function(){
+            var selected_item = $(this).text().trim(); // Supprimer les espaces indésirables
+            console.log(selected_item);
+            if (selected_item === 'Gestion des fichiers') {
+                $(".getFiles").show();
+            } else {
+                $(".getFiles").hide();
+            }
+        });
+
     });
 
 </script>

@@ -16,8 +16,7 @@
         $tablesQuery = [
             "CREATE TABLE IF NOT EXISTS client (
                         id_client SERIAL PRIMARY KEY,
-                        nomclient VARCHAR(200),
-                        prenom_client VARCHAR(200)
+                        nomclient VARCHAR(200)
                     );
             ",
             "CREATE TABLE IF NOT EXISTS catalogue_aggregateur (
@@ -26,8 +25,8 @@
                 tarif_on_net VARCHAR(200),
                 tarif_off_net VARCHAR(200),
                 tarif_moyene VARCHAR(200)
-            );", "
-            CREATE TABLE IF NOT EXISTS type_client (
+            );", 
+            "CREATE TABLE IF NOT EXISTS type_client (
                 id_type_client SERIAL PRIMARY KEY,
                 describ VARCHAR(200)
             );
@@ -60,34 +59,34 @@
                 FOREIGN KEY (id_catalogue) REFERENCES catalogue(id_catalogue)
             );
             ",
-            "   CREATE TABLE IF NOT EXISTS biling_aggregateur (
-                id_biling_aggregat SERIAL PRIMARY KEY,
+            "   CREATE TABLE IF NOT EXISTS billing_aggregateur (
+                id_billing_aggregat SERIAL PRIMARY KEY,
                 id_utilisateur INTEGER,
                 FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
             );
             ",
-            "CREATE TABLE IF NOT EXISTS biling (
-                id_biling SERIAL PRIMARY KEY,
+            "CREATE TABLE IF NOT EXISTS billing (
+                id_billing SERIAL PRIMARY KEY,
+                destination VARCHAR(200),
                 nombre_sms_mois INTEGER,
                 libelle VARCHAR(200),
-                destination VARCHAR(200),
                 mois_fac DATE,
                 id_utilisateur INTEGER,
                 FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
             );
             ",
-            "CREATE TABLE IF NOT EXISTS client_biling (
-                id_client_biling SERIAL PRIMARY KEY,
+            "CREATE TABLE IF NOT EXISTS client_billing (
+                id_client_billing SERIAL PRIMARY KEY,
                 id_client INTEGER,
-                id_biling INTEGER,
+                id_billing INTEGER,
                 FOREIGN KEY (id_client) REFERENCES client(id_client),
-                FOREIGN KEY (id_biling) REFERENCES biling(id_biling)
+                FOREIGN KEY (id_billing) REFERENCES billing(id_billing)
             );
-            ","CREATE TABLE IF NOT EXISTS biling_aggregateur_client (
+            ","CREATE TABLE IF NOT EXISTS billing_aggregateur_client (
                 id_bac SERIAL PRIMARY KEY,
-                id_biling_aggregat INTEGER,
+                id_billing_aggregat INTEGER,
                 id_client INTEGER,
-                FOREIGN KEY (id_biling_aggregat) REFERENCES biling_aggregateur(id_biling_aggregat),
+                FOREIGN KEY (id_billing_aggregat) REFERENCES billing_aggregateur(id_billing_aggregat),
                 FOREIGN KEY (id_client) REFERENCES client(id_client)
             );
             ",
@@ -125,11 +124,13 @@
 
             if (!$user) {
                 die("Cet utilisateur n'existe pas ou le mot de passse n'est pas correct dans la base de données");
+                exit();
             } else {
                 $_SESSION['UserName'] = $UserName;
+                $_SESSION['User_Id'] = $user;
+
             }
         }
-        
 
         // Assurez-vous qu'aucune sortie n'est générée avant l'en-tête de redirection
         // ob_start();
