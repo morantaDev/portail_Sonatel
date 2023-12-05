@@ -1,0 +1,114 @@
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .main_container{
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .sidebar{
+            height: 92%;
+            width: 250px;
+            min-width: 250px;
+            max-width: 250px;
+            background: #DEC1A7;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            top: 78px;
+            z-index: 1;
+            left: -250px;
+            position: absolute;
+            transition: left 0.3s;
+        }
+        /* .sidebar button{
+            position: relative;
+            left: 30%;
+            padding: 10px 20px;
+            top: 8px;
+            color: white;
+            background-color: #492809;
+        } */
+        .sidebar h1{
+            text-align: center;
+            background-color: #caa27f;
+            padding: 20px 0;
+            position: relative;
+            top: -2px;
+        }
+        .sidebar ul {
+            margin-top: 25%;
+        }
+        .menu_item {
+            position: relative;
+            right: 40px;
+            list-style: none;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            font-size: 20px;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            width: 100%;
+            font-weight: bold;
+        }
+        .menu_item:hover{
+            color: white;
+            background-color: #492809;
+            font-size: 15px; /* Ajoutez la taille de police souhaitée pour le survol */
+        }
+        .content{
+            width: 100%;
+            height: 100%;
+            border: 1px solid black;
+            position: relative;
+            z-index: 1;
+        }
+        .open {
+            left: 0; /* Ajustez la position lorsque le sidebar est ouvert */
+        }
+        .content .collapsed {
+            width: calc(100% - 250px); /* Ajustez la largeur en fonction de la largeur du sidebar ouvert */
+            left: 250px;
+        }
+        #header{
+            position: relative;
+            z-index: 2;
+        }
+        footer p {
+            text-align: center;
+            color: white;
+        }
+        footer{
+            position: relative;
+            background-color: black;
+            z-index: 2;
+            width: 100%;
+            height: 30%;
+            /* top: -10%; */
+            padding: 50px 0;
+        }
+        #list_button {
+            background-color: #492809;
+            padding: 20px 10px;
+            width: 50px;
+            position: relative;
+            top: 35%;
+            left: 0;
+            border-radius: 0 20px 20px 0;
+            transition: left 0.3s;
+        }
+        #list_button.open {
+            left: 250px; /* Ajustez la position lorsque le sidebar est ouvert */
+        }
+        #list_button svg {
+            color: white;
+            position: relative;
+            top: 7px;
+        }
+    </style>
