@@ -266,7 +266,7 @@
         </div>
         <div class="content">
             <!-- Toutes les tableaux seront affichés içi -->
-            <p><?php echo "Bienvenue" ." ".$UserName ;?></p>
+            <p><?php echo "Bienvenue" ." ".$sUserName ;?></p>
             <div class="getFiles">
                 <?php include "saly.html"; ?>
             </div>
