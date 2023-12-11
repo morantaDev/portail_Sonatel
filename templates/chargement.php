@@ -108,76 +108,85 @@ try {
                         // Obtenez la date formatée sous forme de chaîne
                         $formattedMonth = $formattedMonthObject->format('Y-m-d');
                         echo "Mois de facturation : $formattedMonth\n";
+
+                        
+                        //Faire une requête pour vérifier si un fichier billing portant la même date n'est pas déjà insérer
+                        $queryDateFile = $db->prepare("SELECT * FROM billing WHERE mois_fac =? ");
+                        $queryDateFile->execute([$formattedMonth]);
+                        $resultDate = $queryDateFile->fetch(PDO::FETCH_ASSOC);
+                        
+                        if (!$resultDate) {          
+                            // Sélectionner la feuille de calcul active
+                            $sheet = $spreadsheet->getActiveSheet();
+        
+                            //Secletionner les clients de façon unique
+                            // $uniqueName = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
+                            // $uniqueName->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::Conditional::CONDITION_UNIQUE);    
+        
+                            // $UniqueConditionalApply -> $spreadsheet -> getActiveSheet();
+                            
+                        
+                            $insertQuery = $db->prepare("INSERT INTO billing (client, compte, nombre_sms_mois, libelle, destination, mois_fac, id_utilisateur) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                            
+        
+                            // Préparez la requête d'insertion pour les clients
+                            $insertClient = $db->prepare("INSERT INTO client (nomclient) VALUES (?)");
+        
+                            // Préparez la requête de vérification si le client existe déjà
+                            $clientExists = $db->prepare("SELECT COUNT(*) AS count FROM client WHERE nomclient = ?");
+        
+        
+        
+                            // Parcourir les lignes de la feuille de calcul et insérer dans la table "billing"
+                            foreach ($sheet->getRowIterator() as $index => $row) {
+                                if ($index === 1) {
+                                    continue;
+                                }
+                                $rowData = $sheet->rangeToArray('A' . $row->getRowIndex() . ':' . $sheet->getHighestColumn() . $row->getRowIndex(), null, true, false);
+                                // var_dump($rowData[0][2]);
+                                // var_dump($rowData);
+                        
+                                 // Exécuter la requête avec les valeurs liées
+                                 $insertQuery->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2], $rowData[0][4], $rowData[0][3], $formattedMonth, $User_Id]);
+                                //  $insertClient ->execute([$rowData[0][0]]);
+        
+            
+                                // Exécuter la requête pour vérifier si le client existe déjà
+                                $clientExists->execute([$rowData[0][0]]);
+                                $clientExistsCount = $clientExists->fetchColumn();
+        
+                                if ($clientExistsCount > 0) {
+                                    // Le nom du client existe déjà
+                                    echo "Le nom du client existe déjà.";
+                                    } else {
+                                        // Le nom du client n'existe pas encore, donc l'insérer
+                                        $insertClient->execute([$rowData[0][0]]);
+                                    }        
+                                }
+                                // Exécuter la requête pour vérifier si le client existe déjà
+                                $clientExists->execute([$rowData[0][0]]);
+                                $clientExistsCount = $clientExists->fetchColumn();
+        
+                                if ($clientExistsCount > 0) {
+                                    // Le nom du client existe déjà
+                                    echo "Le nom du client existe déjà.";
+                                } else {
+                                    // Le nom du client n'existe pas encore, donc l'insérer
+                                    $insertClient->execute([$rowData[0][0]]);
+                                }
+                                      
+                            echo "Importation réussie.";
+    
+                        } else {
+                            die ("Un fichier billing de la même date existe déjà dans la base de données");
+                        }
                     } else {
                         die("Le chemin du fichier est incorrect ou non défini.");
                     }
-                
-                    // Sélectionner la feuille de calcul active
-                    $sheet = $spreadsheet->getActiveSheet();
 
-                    //Secletionner les clients de façon unique
-                    // $uniqueName = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
-                    // $uniqueName->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::Conditional::CONDITION_UNIQUE);    
-
-                    // $UniqueConditionalApply -> $spreadsheet -> getActiveSheet();
-                    
-                
-                    $insertQuery = $db->prepare("INSERT INTO billing (client, compte, nombre_sms_mois, libelle, destination, mois_fac, id_utilisateur) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    
-
-                    // Préparez la requête d'insertion pour les clients
-                    $insertClient = $db->prepare("INSERT INTO client (nomclient) VALUES (?)");
-
-                    // Préparez la requête de vérification si le client existe déjà
-                    $clientExists = $db->prepare("SELECT COUNT(*) AS count FROM client WHERE nomclient = ?");
-
-
-
-                    // Parcourir les lignes de la feuille de calcul et insérer dans la table "billing"
-                    foreach ($sheet->getRowIterator() as $index => $row) {
-                        if ($index === 1) {
-                            continue;
-                        }
-                        $rowData = $sheet->rangeToArray('A' . $row->getRowIndex() . ':' . $sheet->getHighestColumn() . $row->getRowIndex(), null, true, false);
-                        // var_dump($rowData[0][2]);
-                        // var_dump($rowData);
-                
-                         // Exécuter la requête avec les valeurs liées
-                         $insertQuery->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2], $rowData[0][4], $rowData[0][3], $formattedMonth, $User_Id]);
-                        //  $insertClient ->execute([$rowData[0][0]]);
-
-    
-                        // Exécuter la requête pour vérifier si le client existe déjà
-                        $clientExists->execute([$rowData[0][0]]);
-                        $clientExistsCount = $clientExists->fetchColumn();
-
-                        if ($clientExistsCount > 0) {
-                            // Le nom du client existe déjà
-                            echo "Le nom du client existe déjà.";
-                        } else {
-                            // Le nom du client n'existe pas encore, donc l'insérer
-                            $insertClient->execute([$rowData[0][0]]);
-                        }        
-                    }
-                        // Exécuter la requête pour vérifier si le client existe déjà
-                        $clientExists->execute([$rowData[0][0]]);
-                        $clientExistsCount = $clientExists->fetchColumn();
-
-                        if ($clientExistsCount > 0) {
-                            // Le nom du client existe déjà
-                            echo "Le nom du client existe déjà.";
-                        } else {
-                            // Le nom du client n'existe pas encore, donc l'insérer
-                            $insertClient->execute([$rowData[0][0]]);
-                        }
-                              
-                    echo "Importation réussie.";
 
                 } elseif (str_contains($emplacementDestination, "catalogue")) {
                     $excelFilePath = $emplacementDestination;
-
-                    
-
 
                     $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFilePath);
 

@@ -1,4 +1,25 @@
 <?php
+    include "../models/client_class.php";
+    // Instanciez la classe Db_client
+    $dbClient = new Db_client();
+    // Obtenez tous les clients
+    $clients = $dbClient->getAllClients();
+
+    // Nombre d'éléments par page
+    $perPage = 15;
+
+    // Nombre total de pages
+    $totalPages = ceil(count($clients) / $perPage);
+
+    // Page actuelle (par défaut à la première page si non définie)
+    $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+
+    // Sélectionnez les clients pour la page actuelle
+    $start = ($currentPage - 1) * $perPage;
+    $end = $start + $perPage;
+    $selectedClients = array_slice($clients, $start, $perPage);
+
+
     session_start();
     
     // Vérifier si UserName est présent dans la session
@@ -18,17 +39,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Main page</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<title>Main page</title>
 <style>
     body {
         margin: 0;
         width: 100%;
         height: 100%;
-    }
-    .header{
-        position: relative;
-        z-index: 2;
     }
     .full_container{
         /* border: 1px solid black; */
@@ -59,7 +79,6 @@
     }
     .content{
         width: 100%;
-        /* border: 1px solid black; */
         padding-left: 2%;
 
     }
@@ -69,13 +88,18 @@
         padding: 20px 0;
         position: relative;
         top: -2px;
+        font-size: 25px;
+        margin-top: 3px;
+    }
+    .menu_list{
+        width: 100%;
     }
     .menu_item {
         position: relative;
         right: 40px;
         list-style: none;
         text-align: center;
-        margin: 20px 0;
+        margin: 20px;
         padding: 20px;
         font-size: 17px;
         transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
@@ -86,7 +110,10 @@
         cursor: pointer;
         background-color: #492809;
         color: white;
-        font-size: 20px;
+        font-size: 18px;
+        padding: 10%;
+        margin: 0;
+        width: 250px;
     }
     .open .content{
         width:  100%;
@@ -124,100 +151,152 @@
         padding: 10px 5px 10px 20px;
         border-radius: 50%;
     }
-    .container{
-            width: 100%; 
-            height: 79px; 
-            left: 0px; 
-            top: 0px; 
-            position: absolute; 
-            background: #492809;
-        }
-        .search{
-            padding: 15px;
-            position: relative;
-            left: 30%;
-        }
-        .search_input svg{
-            position: relative;
-            top: 8px;
-            color: white;
-            padding-left: 5px;
-            padding-top: 3px;
-            padding-bottom: 1px;
-            margin-left: -3px;
-            border-radius: 0 5px 5px 0;
-        }
-        .search input{
-            font-size: 20px;
-            background-color: transparent;
-            /* border: 1px solid white; */
-            color: white;
-            /* padding-left: 6px; */
-            padding-top: 1px;
-            border-radius: 5px 0 0 5px;
-            padding: 2px 5px;
-        }
-        /* .search_input{
-            position: absolute;
-            left: 20%;
-            padding-top: 20px; */
-            /* border-bottom: 1px solid white; */
-            /* width: 17%;
-            padding-bottom: 2px;
-        } */
-        .search_input::placeholder{
-            color: white;
-            opacity: 1;
-        }
-        .search_input .logo img{
-            width: 220px;
-            height: 50px;
-            padding: 12px 20px;
-            /* border-radius: 30%; */
-        }
-        .connectUser{
-            position: relative;
-            /* border: 1px solid black; */
-            left: 50%;
-            display: flex;
-            width: 15%;
-            top: -2px;
-            padding-bottom: 4px;
-            height: 100%;
-        }
-        .connectedLogo{
-            margin-top: 5px;
-            padding:  0 10px 10px 10px;
-            background-color: black;
-            border-radius: 50%;
-        }
-        .userName{
-            color: white;
-            margin-left: 10px;
-            padding-top: 30px;
-            font-size: 17px;
-            width: 20%;
-            /* border: 1px solid black; */
-            margin-top: -4%;
+    .logo img{
+        margin-top: 10px;
+    }
+    .header-container{
+        width: 100%; 
+        height: 79px; 
+        left: 0px; 
+        top: 0px; 
+        position: absolute; 
+        background: #492809;
+    }
+    .search{
+        padding: 15px;
+        position: relative;
+        left: 30%;
+        display: flex;
+    }
+    .search input{
+        font-size: 20px;
+        background-color: transparent;
+        /* border: 1px solid white; */
+        color: white;
+        /* padding-left: 6px; */
+        padding-top: 1px;
+        border-radius: 5px 0 0 5px;
+        padding: 2px 5px;
+    }
+    .search input{
+        border: none;
+        /* color: white; */
+        color: #492809;
+        border-bottom: 1px solid white;
+    }
+    .search_input::placeholder{
+        color: white;
+        opacity: 1;
+    }
+    .search_input .logo img{
+        width: 220px;
+        height: 50px;
+        padding: 12px 20px;
+        /* border-radius: 30%; */
+    }
+    .connectUser{
+        position: relative;
+        /* border: 1px solid black; */
+        left: 50%;
+        display: flex;
+        width: 15%;
+        top: -2px;
+        padding-bottom: 4px;
+        height: 100%;
+    }
+    .connectedLogo{
+        margin-top: 5px;
+        padding:  10px;
+        background-color: black;
+        border-radius: 50%;
+        color: white;
+    }
+    .userName{
+        color: white;
+        margin-left: 10px;
+        padding-top: 30px;
+        font-size: 17px;
+        width: 20%;
+        /* border: 1px solid black; */
+        margin-top: -6%;
+    }
 
+    .userName a{
+        color: red;
+    }
+    .userName span{
+        color: white;
+        font-size: 20px;
+    }
+    .getFiles{
+        display: none;
+    }
+    .table-client{
+        display: none;
+    }
+    #search-addon{
+        background-color: #492809;
+    }
+    .table-client {
+        margin: 0 auto; /* Ajoutez cette ligne pour centrer le tableau horizontalement */
+        margin-top: 20px;
+        overflow-x: auto;
+        margin-left: 30%;
+        width: 90%; /* Ajustez la largeur du tableau selon vos besoins */
+    }
 
-        }
+    .table-client table {
+        background-color: #fff;
+        border: none;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out;
+        width: 100%;
+    }
 
-        .userName a{
-            color: red;
-        }
-        .userName span{
-            color: white;
-            font-size: 20px;
-        }
-        .getFiles{
-            display: none;
-        }
+    .table-client table:hover {
+        transform: scale(1.02);
+    }
+
+    .table-client th {
+        background-color: #492809;
+        color: #fff;
+        text-align: center;
+        font-size: 18px;
+    }
+    .table-client th  i{
+        font-size: 18px;
+        margin-right: 10px;
+    }
+    .table-client h2{
+        font-size: 32px;
+        margin-right: 10px;
+    }
+
+    .table-client td:nth-child(1) {
+        vertical-align: middle;
+        text-align: center;
+        font-weight: bold;
+    }
+    .table-client td:nth-child(3) i {
+        vertical-align: middle;
+        margin-left: 10px;
+        
+    }
+    .table-client td:nth-child(3) i:hover {
+        cursor: pointer;
+    }
+    .pagination{
+        margin-left: 20%;
+    }
+    .page-link{
+        color: #492809;
+
+    }
 </style>
 </head>
 <body>
 <!-- <div id="header"></div> -->
-<div class="container">
+<div class="header-container">
     <div class="search_input input-group rounded" style="display: flex;">
         <div class="logo">
             <img src="../assets/sonatel_orange_sans_fond.png" alt="">
@@ -225,7 +304,7 @@
         <div class="search">
             <input type="search" class="form-control rounded-left" placeholder="Recherche" aria-label="Search" aria-describedby="search-addon" />
             <span class="input-group-text border-0" id="search-addon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16" style="color: white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16" style="color: white;">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                 </svg>
             </span>
@@ -259,46 +338,114 @@
                 <li class="menu_item">Historiques</li>
             </ul>
             <span id="list_button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
             </svg>
             </span>
         </div>
         <div class="content">
             <!-- Toutes les tableaux seront affichés içi -->
-            <p><?php echo "Bienvenue" ." ".$sUserName ;?></p>
+            <p><?php echo "Bienvenue" ." ".$UserName ;?></p>
             <div class="getFiles">
                 <?php include "saly.html"; ?>
             </div>
+
+            <div class="col-md-8">
+                <div class="table-client">
+                    <table class="table table-bordered">
+                        <h2>Liste des partenaires</h2>
+                        <thead>
+                            <tr>
+                                <th class="id_client">Id Partenaire</th>
+                                <th class="nom_client"><i class="bi bi-person"></i>PARTENAIRE</th>
+                                <th class="action">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($selectedClients as $client): ?>
+                                <tr>
+                                    <td><?php echo $client['id_client']; ?></td>
+                                    <td><strong><?php echo strtoupper($client['nomclient']);?></strong></td>
+                                    <td style="display:flex;"><i class="bi bi-pencil-square"></i><i class="bi bi-trash3-fill"></i></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                    <!-- Ajouter une pagination -->
+                    <ul class="pagination">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <li class="page-item <?php if ($i == $currentPage) echo 'active'; ?>">
+                                <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
 <div class="footer">
     <p>&copy;copyright moranta&Salimata 2023</p>
 </div>
+
+
 <script>
-    $(document).ready(function(){
-        console.log("Chargement de la page terminé.");
+    $(document).ready(function (e) {
+    console.log("Chargement de la page terminé.");
 
+    // Variable pour stocker l'élément sélectionné
+    var selectedMenuItem = "";
 
-        $("#list_button").on('click', function(){
-            $(".sidebar").toggleClass("open");
-            $(".content").toggleClass("collapsed");
-            $("#list_button").toggleClass("open");
-        });
+    $("#list_button").on('click', function () {
+        $(".sidebar").toggleClass("open");
+        $(".content").toggleClass("collapsed");
+        $("#list_button").toggleClass("open");
+    });
 
-        $(".menu_list li").click(function(){
-            var selected_item = $(this).text().trim(); // Supprimer les espaces indésirables
-            console.log(selected_item);
-            if (selected_item === 'Gestion des fichiers') {
-                $(".getFiles").show();
-            } else {
-                $(".getFiles").hide();
+    $(".menu_list li").click(function () {
+        var selected_item = $(this).text().trim(); // Supprimer les espaces indésirables
+        console.log(selected_item);
+
+        // Afficher ou masquer les éléments en fonction de l'élément sélectionné
+        if (selected_item === 'Gestion des fichiers') {
+            $(".getFiles").show();
+            $(".table-client").hide(); // Masquer la table des clients
+        } else if (selected_item === 'Gestion Partenaires') {
+            $(".getFiles").hide();
+            $(".table-client").show(); // Afficher la table des clients
+        } else {
+            $(".getFiles").hide();
+            $(".table-client").hide(); // Masquer la table des clients pour d'autres éléments
+        }
+    });
+
+    // Gérer la pagination
+    $(document).on('click', '.table-client .pagination a.page-link', function (e) {
+        e.preventDefault();
+        // Charger la page suivante via AJAX
+        var page = $(this).attr("href").split("=")[1];
+        loadPage(page);
+    });
+
+    function loadPage(page) {
+        // Effectuer une requête AJAX pour charger le contenu du tableau
+        console.log('Chargement de la page', page);
+
+        $.ajax({
+            url: 'charger_page_clients.php?page=' + page,
+            type: 'GET',
+            success: function (response) {
+                // Mettre à jour le contenu de la div avec le nouveau HTML
+                $(".table-client").html(response);
+                console.log(response);
+            },
+            error: function () {
+                console.log('Erreur lors du chargement de la page');
             }
         });
-
-    });
+    }
+});
 
 </script>
 </body>
