@@ -1,44 +1,54 @@
 <?php
 
+require_once "../helpers/database_class.php";
+
 class Db_client {
     private $db;
 
     public function __construct(){
-        $this->$db = new DatabaseConnection;
+        $this->db = new DatabaseConnection;
     }
 
     public function get_by_id($id){
-        $sql = "SELECT * FROM client WHERE id=$id";
-        $result = $this->db->query($sql);
-        return $result->fetch_assoc();
+        $sql = "SELECT * FROM client WHERE id=?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
     public function getAllClients(){
         $sql = "SELECT * FROM client";
-        $result = $this->$db->query($sql);
-        return $result->fetch_assoc();
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function deleteClient($id){
-        $query = "SELECT * FROM client WHERE id=$id";
-        $getClient = $this->$db->query($query);
-        if (!$getClient){
-            die ("le client que vous voulez supprimer n'existe pas dans la base de données");
+        $query = "SELECT * FROM client WHERE id=?";
+        $getClient = $this->db->prepare($query);
+        $getClient->execute([$id]);
+
+        if (!$getClient->fetch(PDO::FETCH_ASSOC)){
+            die("Le client que vous voulez supprimer n'existe pas dans la base de données");
         } else {
-            $sql = "DELETE FROM client WHERE id=$id";
-            $result = $this->$db->query($sql);
+            $sql = "DELETE FROM client WHERE id=?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
         }
-        return $result->fetch_assoc();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    public function updateClient($inpurData, $id){
-        $query = "SELECT * FROM client WHERE id=$id";
-        $getClient = $this->$db->query($query);
-        if (!$getClient){
-            die ("le client que vous voulez mettre à jour n'existe pas dans la base de données");
+
+    public function updateClient($inputData, $id){
+        $query = "SELECT * FROM client WHERE id=?";
+        $getClient = $this->db->prepare($query);
+        $getClient->execute([$id]);
+
+        if (!$getClient->fetch(PDO::FETCH_ASSOC)){
+            die("Le client que vous voulez mettre à jour n'existe pas dans la base de données");
         } else {
-            // $sql = "UPDATE client SET  WHERE id=$id";
-            // $result = $this->$db->query($sql);
-            echo "cette methode n'est pas encore prise en charge";
+            // La mise à jour n'est pas encore prise en charge
+            return false;
         }
-        return $result->fetch_assoc();
     }
 }
 

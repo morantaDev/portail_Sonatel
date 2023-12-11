@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"> -->
@@ -48,6 +49,7 @@
     }
     .login_page button{
         width: 100%;
+        max-width: 100%;
         margin: 15px 0;
         position: relative;
         top: -5px;
@@ -60,6 +62,32 @@
     .Connexion{
         padding-top: 30px;
     }
+    /* Ajoutez ces styles dans votre balise style après vos styles existants */
+
+    /* Pour les écrans de petite taille (téléphones) */
+    @media (max-width: 767px) {
+        .login_page {
+            width: 80%; /* Ajustez la largeur pour les petits écrans */
+        }
+    }
+
+    /* Pour les écrans de taille moyenne (tablettes) */
+    @media (min-width: 768px) and (max-width: 991px) {
+        .login_page {
+            width: 60%; /* Ajustez la largeur pour les tablettes */
+        }
+    }
+
+    /* Pour les écrans de grande taille (ordinateurs de bureau) */
+    @media (min-width: 22%) {
+        .login_page {
+            width: 40%; /* Ajustez la largeur pour les ordinateurs de bureau */
+        }
+    }
+    .connexion-btn {
+        max-height: 50%; /* Limiter la hauteur du bouton à 100% du conteneur parent */
+    }
+
     </style>
 </head>
 <body>
@@ -83,7 +111,7 @@
                     <input type="password" class="form-control" id="password" name="password" placeholder="Entrer le mot de passe" autocomplete="current-password" required>
                 </div>
                 <div class="Connexion">
-                    <button type="submit" class="btn btn-primary btn-lg">Connexion
+                    <button type="submit" class="btn btn-primary btn-lg connexion-btn">Connexion
                         <span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16" style="position: relative; top: 10px;">
                                 <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
