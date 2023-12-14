@@ -5,11 +5,11 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 session_start();
 
-if(!$_SESSION['User_Id']){
+if(!$_SESSION['User']){
     die("L'id de utilisateur n'est pas bien stocké dans les sessions");
     exit();
 } else {
-    $User_Id = $_SESSION['User_Id'];
+    $User_Id = $_SESSION['User'];
     $User_Id = $User_Id['id_utilisateur'];
 }
 
@@ -100,35 +100,38 @@ try {
                         
                         // Reformatez la chaîne de mois pour qu'elle corresponde à "YYYY-MM"
                         $formattedMonthObject = DateTime::createFromFormat('Ymd', $monthInFileName);
-                        
+
+
                         if ($formattedMonthObject === false) {
                             die("Erreur lors du formatage de la date.");
                         }
+
+                        // Obtenez le dernier jour du mois
+                        $lastDayOfMonth = $formattedMonthObject->format('Y/m/t');
+                        echo $lastDayOfMonth;
+
+                        // Ajoutez le dernier jour du mois au nom du fichier
+                        $newFileName = pathinfo($excelFilePath, PATHINFO_FILENAME) . '.' . $lastDayOfMonth . '.xlsx';
+
+                        // Affichez le nouveau nom du fichier
+                        echo "Nouveau nom du fichier : $newFileName\n";
                         
                         // Obtenez la date formatée sous forme de chaîne
                         $formattedMonth = $formattedMonthObject->format('Y-m-d');
                         echo "Mois de facturation : $formattedMonth\n";
 
-                        
+                    
                         //Faire une requête pour vérifier si un fichier billing portant la même date n'est pas déjà insérer
                         $queryDateFile = $db->prepare("SELECT * FROM billing WHERE mois_fac =? ");
-                        $queryDateFile->execute([$formattedMonth]);
+                        $queryDateFile->execute([$lastDayOfMonth]);
                         $resultDate = $queryDateFile->fetch(PDO::FETCH_ASSOC);
-                        
+                    
                         if (!$resultDate) {          
                             // Sélectionner la feuille de calcul active
                             $sheet = $spreadsheet->getActiveSheet();
-        
-                            //Secletionner les clients de façon unique
-                            // $uniqueName = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
-                            // $uniqueName->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::Conditional::CONDITION_UNIQUE);    
-        
-                            // $UniqueConditionalApply -> $spreadsheet -> getActiveSheet();
-                            
-                        
+
                             $insertQuery = $db->prepare("INSERT INTO billing (client, compte, nombre_sms_mois, libelle, destination, mois_fac, id_utilisateur) VALUES (?, ?, ?, ?, ?, ?, ?)");
                             
-        
                             // Préparez la requête d'insertion pour les clients
                             $insertClient = $db->prepare("INSERT INTO client (nomclient) VALUES (?)");
         
@@ -146,8 +149,8 @@ try {
                                 // var_dump($rowData[0][2]);
                                 // var_dump($rowData);
                         
-                                 // Exécuter la requête avec les valeurs liées
-                                 $insertQuery->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2], $rowData[0][4], $rowData[0][3], $formattedMonth, $User_Id]);
+                                    // Exécuter la requête avec les valeurs liées
+                                    $insertQuery->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2], $rowData[0][4], $rowData[0][3], $lastDayOfMonth, $User_Id]);
                                 //  $insertClient ->execute([$rowData[0][0]]);
         
             
@@ -163,27 +166,15 @@ try {
                                         $insertClient->execute([$rowData[0][0]]);
                                     }        
                                 }
-                                // Exécuter la requête pour vérifier si le client existe déjà
-                                $clientExists->execute([$rowData[0][0]]);
-                                $clientExistsCount = $clientExists->fetchColumn();
-        
-                                if ($clientExistsCount > 0) {
-                                    // Le nom du client existe déjà
-                                    echo "Le nom du client existe déjà.";
-                                } else {
-                                    // Le nom du client n'existe pas encore, donc l'insérer
-                                    $insertClient->execute([$rowData[0][0]]);
-                                }
-                                      
-                            echo "Importation réussie.";
-    
+                                        
+                                echo "Importation réussie.";
                         } else {
                             die ("Un fichier billing de la même date existe déjà dans la base de données");
                         }
+
                     } else {
                         die("Le chemin du fichier est incorrect ou non défini.");
                     }
-
 
                 } elseif (str_contains($emplacementDestination, "catalogue")) {
                     $excelFilePath = $emplacementDestination;
@@ -207,14 +198,6 @@ try {
 
 
                         $insertCatalogue->execute([$rowData[0][0], $rowData[0][1],$rowData[0][2], $rowData[0][3]]);
-                        // $ExistingCode->execute([$rowData[0][1]]);
-                        // $ExistingCodeCount=$ExistingCode->fetchColumn();
-
-                        // if($ExistingCodeCount > 0){
-                        //     echo "Le code existe déjà dans la base de données";
-                        // } else {
-                        //     $insertCode->execute($rowData[0][0]);
-                        // }
                     }
                     
                     $worksheet1 = $spreadsheet->getSheetByName("engagements");
@@ -227,43 +210,54 @@ try {
                                 continue;
                             }
                         $rowData = $worksheet1->rangeToArray('A' . $row->getRowIndex() . ':' . $highestColumn1 . $row->getRowIndex(), null, true, false);
-                        var_dump($rowData[0][0]);   //Récupération des colonnes
+                        //var_dump($rowData[0][0]);   //Récupération des colonnes
                         
                         $prix_osm = ($rowData[0][2]) ? $rowData[0][2] : 0;
-                        // if($prix_osm>0){
-                        //     // $UpdateCatalogue
-                        //     $UpdateCatalogue->execute(['true']);
-                        // }
-                        // var_dump($prix_osm);
                         
                         //inserer les osm dans la table offre_sur_mesure
                         $insertEngagement->execute([$rowData[0][0], $rowData[0][1], $prix_osm]);
                         
                     }
-
-
-
-
-                    // for ($row = 1; $row <= $highestRow; ++$row) {
-                    //     for ($col = 'A'; $col <= $highestColumn; ++$col) {
-                    //         $cellValue = $worksheet->getCell($col . $row)->getValue();
-                    //         var_dump($cellValue);
-                    //     }
-                    // }
-                        // echo '<table>' . "\n";
-                        // for ($row = 1; $row <= $highestRow; ++$row) {
-                        //     echo '<tr>' . PHP_EOL;
-                        //     for ($col = 'A'; $col <= $highestColumn; ++$col) {
-                        //         echo '<td>' .
-                        //             $worksheet->getCell($col . $row)
-                        //                 ->getValue() .
-                        //             '</td>' . PHP_EOL;
-                        //     }
-                        //     echo '</tr>' . PHP_EOL;
-                        // }
-                        // echo '</table>' . PHP_EOL;
-                    
                     echo "Importation réussie.";
+
+
+                    //Recupérer le fichier catalogue aggregateur contenant les nouveaux tarifs
+                } elseif (str_contains($emplacementDestination, "nouveaux_tarifs")){
+                    $excelFilePath = $emplacementDestination;
+                    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFilePath);
+                    $catalogueAggSheet = $spreadsheet->getActiveSheet();
+                    $highestColumn = $catalogueAggSheet->getHighestDataColumn();
+
+                    // Requête pour insérer le fichier au niveau de la base de données
+                    $queryAggr = $db->prepare("INSERT INTO catalogue_aggregateur (paliers, tarif_on_net, tarif_off_net) VALUES (?, ?, ?)");
+
+                    // Préparez la requête de vérification si le client existe déjà
+                    $CatalogAggrExists = $db->prepare("SELECT COUNT(*) AS count FROM catalogue_aggregateur WHERE paliers = ? AND tarif_on_net = ? AND tarif_off_net = ?");
+
+                    foreach ($catalogueAggSheet->getRowIterator() as $index => $row) {
+                        if ($index === 1) {
+                            continue;
+                        }
+                        $rowData = $catalogueAggSheet->rangeToArray('A' . $row->getRowIndex() . ':' . $highestColumn . $row->getRowIndex(), null, true, false);
+
+                        // Exécutez la requête pour vérifier si l'enregistrement existe
+                        $CatalogAggrExists->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2]]);
+
+                        // Récupérez le résultat
+                        $count = $CatalogAggrExists->fetchColumn();
+
+                        if ($count > 0) {
+                            // Le nom du client existe déjà
+                            echo "Le fichier catalogue que vous essayez de charger existe déjà dans la base de données.";
+                        } else {
+                            // Le nom du client n'existe pas encore, donc l'insérer
+                            $queryAggr->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2]]);
+                        }
+                    }
+                    echo "Importation réussie.";
+
+                } elseif (str_contains($emplacementDestination, 'billing_aggre')){
+                    //ajouter le code içi
                 }
             }
         }
