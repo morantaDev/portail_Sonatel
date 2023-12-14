@@ -22,9 +22,11 @@
             "CREATE TABLE IF NOT EXISTS catalogue_aggregateur (
                 id_catalogue_aggregat SERIAL PRIMARY KEY,
                 paliers VARCHAR(200),
-                tarif_on_net VARCHAR(200),
-                tarif_off_net VARCHAR(200),
-                tarif_moyene VARCHAR(200)
+                tarif_on_net DECIMAL(5, 2),
+                tarif_off_net DECIMAL(5, 2)
+                -- tarif_on_net VARCHAR(200),
+                -- tarif_off_net VARCHAR(200)
+                -- tarif_moyene VARCHAR(200)
             );"
             // , 
             // "CREATE TABLE IF NOT EXISTS type_client (
@@ -134,7 +136,7 @@
                 exit();
             } else {
                 $_SESSION['UserName'] = $UserName;
-                $_SESSION['User_Id'] = $user;
+                $_SESSION['User'] = $user;
 
             }
         }
