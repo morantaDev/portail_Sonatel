@@ -1,18 +1,15 @@
 <?php
 
-require_once "connexion.php";
 require '../vendor/autoload.php';
+require_once "connexion.php";
+require_once "../helpers/database_class.php";
 
-$HOST = "localhost";
-$PORT = "5432";
-$DBNAME = "sms_pro_database";
-$PWD = "Wizzle21#";
 
 try {
-    $dsn = "pgsql:host=$HOST;port=$PORT;dbname=$DBNAME;user=moranta;password=$PWD";
-    $db = new PDO($dsn);
+    $db = new DatabaseConnection();
+    $db = $db->getConnection();
 
-    $sql = "SELECT compte, destination, nombre_sms_mois as Trafic FROM billing WHERE compte LIKE 'MBK%' OR compte LIKE 'WTS%'";
+    $sql = "SELECT compte, destination, nombre_sms_mois as trafic FROM billing WHERE compte LIKE 'MBK%' OR compte LIKE 'WTS%'";
     $queryCompte = $db->prepare($sql);
     $queryCompte->execute();
     $resultCompte = $queryCompte->fetchAll(PDO::FETCH_ASSOC);
@@ -137,6 +134,7 @@ try {
     });
     
     // Calcul MTN_TCK pour CBAO contrat Octobre 2022
+    
     foreach ($cbaoSvn as &$row) {
         $row['MTN_TCK'] = $row['trafic_total'] * 5;
     }
@@ -194,16 +192,16 @@ try {
 
 
         foreach ($conditions as &$condition) {
-            if ($condition['trafic'] <= $tarif) {
-                $condition['MTN_TCK'] = 1;
+            if ($condition['trafic_associe'] <= $tarif) {
+                $condition['MTN_TCK'] = 0;
                 $condition['KTCK'] = $tarif . ' sms vers national';
-            } elseif ($condition['trafic'] > $tarif) {
-                $condition['MTN_TCK'] = (5 * $condition['trafic']) - $montantEngagement;
+            } elseif ($condition['trafic_associe'] > $tarif) {
+                $condition['MTN_TCK'] = (5 * $condition['trafic_associe']) - $montantEngagement;
             }
 
-            $condition['CA'] = 5 * $condition['trafic'];
+            $condition['CA'] = 5 * $condition['trafic_associe'];
             // Pour ceux qui n'ont pas d'engagement
-            $condition['MTN_TCK'] = $tarif * $condition['trafic'];
+            $condition['MTN_TCK'] = $tarif * $condition['trafic_associe'];
         }
 
         return $row;  // Retournez la ligne mise à jour
@@ -212,7 +210,6 @@ try {
     // Appliquez la fonction à chaque ligne de la DataFrame 'engagements'
     $engagements = array_map('applyTransformations', $resultOSM);
 
-    // La DataFrame 'parc' a maintenant été mise à jour avec les transformations
 
     // Bon CA
     foreach ($finalTable as &$row) {

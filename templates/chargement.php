@@ -1,10 +1,9 @@
 <?php
 require '../vendor/autoload.php';
-
+require_once "../helpers/database_class.php";
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 session_start();
-
 if(!$_SESSION['User']){
     die("L'id de utilisateur n'est pas bien stocké dans les sessions");
     exit();
@@ -14,16 +13,9 @@ if(!$_SESSION['User']){
 }
 
 
-
-$HOST = "localhost";
-$PORT = "5432";
-$DBNAME = "sms_pro_database";
-$PWD = "Wizzle21#";
-
 try {
-    $dsn = "pgsql:host=$HOST;port=$PORT;dbname=$DBNAME;user=moranta;password=$PWD";
-    $db = new PDO($dsn);
-
+    $db = new DatabaseConnection();
+    $db = $db->getConnection();
 
     //Récupérer le chemin du fichier
     if ($_SERVER["REQUEST_METHOD"] === "POST"){
@@ -107,7 +99,7 @@ try {
                         }
 
                         // Obtenez le dernier jour du mois
-                        $lastDayOfMonth = $formattedMonthObject->format('Y/m/t');
+                        $lastDayOfMonth = $formattedMonthObject->format('t-m-Y');
                         echo $lastDayOfMonth;
 
                         // Ajoutez le dernier jour du mois au nom du fichier
@@ -261,6 +253,7 @@ try {
                 }
             }
         }
+
     } else {
         echo "Erreur lors du téléchargement du fichier.";
     }

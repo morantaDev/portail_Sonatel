@@ -4,14 +4,12 @@
 
     require_once "connexion.php";
 
-    $HOST = "localhost";
-    $PORT = "5432";
-    $DBNAME = "sms_pro_database";
-    $PWD = "Wizzle21#";
+    require_once "../helpers/database_class.php";
 
     try {
-        $dsn = "pgsql:host=$HOST;port=$PORT;dbname=$DBNAME;user=moranta;password=$PWD";
-        $db = new PDO($dsn);
+
+        $db = new DatabaseConnection();
+        $db = $db->getConnection();
 
         $tablesQuery = [
             "CREATE TABLE IF NOT EXISTS client (
@@ -23,10 +21,8 @@
                 id_catalogue_aggregat SERIAL PRIMARY KEY,
                 paliers VARCHAR(200),
                 tarif_on_net DECIMAL(5, 2),
-                tarif_off_net DECIMAL(5, 2)
-                -- tarif_on_net VARCHAR(200),
-                -- tarif_off_net VARCHAR(200)
-                -- tarif_moyene VARCHAR(200)
+                tarif_off_net DECIMAL(5, 2),
+                tarif_moyen DECIMAL(5,2)
             );"
             // , 
             // "CREATE TABLE IF NOT EXISTS type_client (
