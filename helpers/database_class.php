@@ -14,6 +14,8 @@ class DatabaseConnection {
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             die("Connection failed: " . $e->getMessage());
+            echo "Erreur PDO : " . $pdoException->getMessage() . "<br>";
+            echo "Code d'erreur : " . $pdoException->getCode();
         }
     }
 
@@ -24,6 +26,9 @@ class DatabaseConnection {
     public function close(){
         // PDO doesn't have a close method, you can unset the connection
         $this->conn = null;
+    }
+    public function getConnection(){
+        return $this->conn;
     }
 }
 

@@ -4,14 +4,12 @@
 
     require_once "connexion.php";
 
-    $HOST = "localhost";
-    $PORT = "5432";
-    $DBNAME = "sms_pro_database";
-    $PWD = "Wizzle21#";
+    require_once "../helpers/database_class.php";
 
     try {
-        $dsn = "pgsql:host=$HOST;port=$PORT;dbname=$DBNAME;user=moranta;password=$PWD";
-        $db = new PDO($dsn);
+
+        $db = new DatabaseConnection();
+        $db = $db->getConnection();
 
         $tablesQuery = [
             "CREATE TABLE IF NOT EXISTS client (
@@ -23,10 +21,8 @@
                 id_catalogue_aggregat SERIAL PRIMARY KEY,
                 paliers VARCHAR(200),
                 tarif_on_net DECIMAL(5, 2),
-                tarif_off_net DECIMAL(5, 2)
-                -- tarif_on_net VARCHAR(200),
-                -- tarif_off_net VARCHAR(200)
-                -- tarif_moyene VARCHAR(200)
+                tarif_off_net DECIMAL(5, 2),
+                tarif_moyen DECIMAL(5,2)
             );"
             // , 
             // "CREATE TABLE IF NOT EXISTS type_client (
@@ -108,7 +104,26 @@
                 FOREIGN KEY (id_osm) REFERENCES catalogue(id_catalogue),
                 FOREIGN KEY (id_catalogue_aggregat) REFERENCES catalogue_aggregateur(id_catalogue_aggregat)
             );
-            "
+            ",
+            "CREATE TABLE IF NOT EXISTS archive_ticket (
+                id_fichier SERIAL PRIMARY KEY NOT NULL,
+                nom_fichier VARCHAR(100) NOT NULL,
+                chemin_fichier VARCHAR(250) NULL,
+                date_creation timestamp default NULL
+                );",
+                "CREATE TABLE IF NOT EXISTS donnees_tickets (
+                    id_ticket SERIAL PRIMARY KEY NOT NULL,
+                    id_fichier INT,
+                    Compte VARCHAR(10) NOT NULL,
+                    NTICKET VARCHAR(10) NOT NULL,
+                    CPROD VARCHAR(10) NOT NULL,
+                    TYPE_TCK VARCHAR(10) NOT NULL,
+                    DATOP_TCK DATE NOT NULL,
+                    SENS VARCHAR(255) NOT NULL,
+                    MTN_TCK INT NOT NULL,
+                    KTCK VARCHAR(255) NOT NULL,
+                    FOREIGN KEY (id_fichier) REFERENCES archive_ticket(id_fichier)
+                );"
         ];
         foreach($tablesQuery as $query){
             $db -> exec($query);
