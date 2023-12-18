@@ -268,21 +268,116 @@ try {
         $worksheet->setCellValueByColumnAndRow($colIndex + 1, 1, $header);
     }
 
-// Ajoutez les données
-foreach ($finalTable as $rowIndex => $row) {
-    for ($i = 0; $i < count($row); $i++) {
-        $worksheet->setCellValueByColumnAndRow($i + 1, $rowIndex + 2, $row[array_keys($row)[$i]]);
+    // Ajoutez les données
+    foreach ($finalTable as $rowIndex => $row) {
+        for ($i = 0; $i < count($row); $i++) {
+            $worksheet->setCellValueByColumnAndRow($i + 1, $rowIndex + 2, $row[array_keys($row)[$i]]);
+        }
     }
-}
 
 
+    $fileName = 'Tickets_SMS_PLUS_Bis_' . $lastDate . '.xlsx';
+    $filePath = '/home/moranta/Downloads/output/' . $fileName; 
+    
+    // Save the Excel file to the server
+    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+    $writer->save($filePath);
 
-$writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
-$writer->save('Tickets_SMS_PLUS_Bis_'.$lastDate.'.xlsx');
+    // Insert data into archive_ticket table
+    $stmtArchive = $db->prepare("INSERT INTO archive_ticket (nom_fichier, chemin_fichier, date_creation) VALUES (?, ?, NOW())");
+    $stmtArchive->bindParam(1, $fileName);
+    $stmtArchive->bindParam(2, $filePath);
+    $stmtArchive->execute();
+
+    // Retrieve the id_fichier of the inserted record
+    $idFichier = $db->lastInsertId();
+
+    // Read data from the Excel file
+    $data = \PhpOffice\PhpSpreadsheet\IOFactory::createReader('Xlsx')->load($filePath);
+    $worksheet = $data->getActiveSheet();
+    $rows = $worksheet->toArray();
+
+    // Remove the header row
+    $header = array_shift($rows);
+
+    // Insert data into donnees_tickets table
+    $stmtTickets = $db->prepare("INSERT INTO donnees_tickets (id_fichier, Compte, NTICKET, CPROD, TYPE_TCK, DATOP_TCK, SENS, MTN_TCK, KTCK) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+    foreach ($rows as $row) {
+        $stmtTickets->bindParam(1, $idFichier);
+        $stmtTickets->bindParam(2, $row[0]); // Compte
+        $stmtTickets->bindParam(3, $row[1]); // NTICKET
+        $stmtTickets->bindParam(4, $row[2]); // CPROD
+        $stmtTickets->bindParam(5, $row[3]); // TYPE_TCK
+        $stmtTickets->bindParam(6, $row[4]); // DATOP_TCK
+        $stmtTickets->bindParam(7, $row[5]); // SENS
+        $stmtTickets->bindParam(8, $row[6]); // MTN_TCK
+        $stmtTickets->bindParam(9, $row[7]); // KTCK
+        $stmtTickets->execute();
+    }
+
+    echo "Données insérées avec succès.";
+
+    // Créez un classeur (spreadsheet) et chargez le fichier Excel
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+
+    // Spécifiez le chemin du fichier CSV
+    $CSVfileName = 'Tickets_SMS_PLUS_Bis_' . $lastDate . '.csv';
+    $CSVfilePath = '/home/moranta/Downloads/output/' . $CSVfileName;
+
+    // Créez un écrivain (writer) pour le classeur au format CSV
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
+    $writer->setDelimiter(';');
+    $writer->setEnclosure('"');
+    $writer->setLineEnding("\r\n");
+    $writer->setSheetIndex(0);
+
+    // Enregistrez le classeur au format CSV
+    $writer->save($CSVfilePath);
+
+    
+    // // Read the file contents as binary data
+    // $fileContent = file_get_contents($filePath);
+    
+    // // Requête SQL préparée pour l'insertion
+    // $stmt = $db->prepare("INSERT INTO archive_ticket (nom_fichier, donnee_fichier, date_creation) VALUES (?,?,NOW())");
+    // // Exécution de la requête avec les valeurs spécifiées
+    // $stmt->bindParam(1, $fileName);
+    // $stmt->bindParam(2, $filePath, PDO::PARAM_LOB);
+    // $stmt->execute();
+
+    // echo "Données insérées avec succès.";
+    
+
+    // $date = new DateTime();
+    // $queryFile = $db->prepare($sql);
+    // $resultFile = $queryFile->execute([$fileContent, $date->format('Y-m-d')]);
+    
+    // Optionally, you can delete the file from the server after inserting into the database
+    // unlink($filePath);
 
 
+    // // Fetch all files from the database
+    // $sql = "SELECT id_fichier, nom_fichier FROM archives";
+    // $query = $db->query($sql);
+    // $files = $query->fetchAll(PDO::FETCH_ASSOC);
+    // print_r($files);
 
-    $data = \PhpOffice\PhpSpreadsheet\IOFactory::load('Tickets_SMS_PLUS_Bis_202309.xlsx');
+    // // Specify the directory where you want to save the files
+    // $saveDirectory = '/home/moranta/Downloads/output/';  // Replace with the actual directory
+
+    // foreach ($files as $file) {
+    //     // Create a unique filename based on the file ID
+    //     $localFileName = $saveDirectory . 'file_' . $file['id_fichier'] . '.xlsx';
+
+    //     // Save the file locally
+    //     file_put_contents($localFileName, $file['nom_fichier'], LOCK_EX);
+    // }
+
+    
+
+
+    // $data = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileName);
 
 
 

@@ -104,7 +104,26 @@
                 FOREIGN KEY (id_osm) REFERENCES catalogue(id_catalogue),
                 FOREIGN KEY (id_catalogue_aggregat) REFERENCES catalogue_aggregateur(id_catalogue_aggregat)
             );
-            "
+            ",
+            "CREATE TABLE IF NOT EXISTS archive_ticket (
+                id_fichier SERIAL PRIMARY KEY NOT NULL,
+                nom_fichier VARCHAR(100) NOT NULL,
+                chemin_fichier VARCHAR(250) NULL,
+                date_creation timestamp default NULL
+                );",
+                "CREATE TABLE IF NOT EXISTS donnees_tickets (
+                    id_ticket SERIAL PRIMARY KEY NOT NULL,
+                    id_fichier INT,
+                    Compte VARCHAR(10) NOT NULL,
+                    NTICKET VARCHAR(10) NOT NULL,
+                    CPROD VARCHAR(10) NOT NULL,
+                    TYPE_TCK VARCHAR(10) NOT NULL,
+                    DATOP_TCK DATE NOT NULL,
+                    SENS VARCHAR(255) NOT NULL,
+                    MTN_TCK INT NOT NULL,
+                    KTCK VARCHAR(255) NOT NULL,
+                    FOREIGN KEY (id_fichier) REFERENCES archive_ticket(id_fichier)
+                );"
         ];
         foreach($tablesQuery as $query){
             $db -> exec($query);

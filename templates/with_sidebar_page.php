@@ -1,5 +1,14 @@
 <?php
     include "../models/client_class.php";
+
+    $db = new DatabaseConnection();
+    $db = $db->getConnection();
+
+    $sql = "SELECT * FROM archive_ticket";
+    $files = $db->prepare($sql);
+    $files->execute();
+    $resultsFiles = $files->fetchAll(PDO::FETCH_ASSOC);
+
     // Instanciez la classe Db_client
     $dbClient = new Db_client();
     // Obtenez tous les clients
@@ -231,8 +240,34 @@
     .getFiles{
         display: none;
     }
-    .table-client{
+    .table-client {
         display: none;
+    }
+    .table-fichiersTraites{
+        display: none;
+    }
+    .table-fichiersTraites table{
+        background-color: #fff;
+        border: none;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out;
+        width: 100%;
+    }
+    .table-fichiersTraites{
+        margin: 0 auto;
+        margin-top: 20px;
+        overflow-x: auto;
+        margin-left: 5%;
+        width: 90%; 
+    }
+    .table-fichiersTraites th{
+        background-color: #492809;
+        color: #fff;
+        text-align: center;
+        font-size: 18px;
+    }
+    .table-fichiersTraites table:hover {
+        transform: scale(1.02);
     }
     #search-addon{
         background-color: #492809;
@@ -241,7 +276,7 @@
         margin: 0 auto; /* Ajoutez cette ligne pour centrer le tableau horizontalement */
         margin-top: 20px;
         overflow-x: auto;
-        margin-left: 30%;
+        margin-left: 15%;
         width: 90%; /* Ajustez la largeur du tableau selon vos besoins */
     }
 
@@ -286,7 +321,7 @@
         cursor: pointer;
     }
     .pagination{
-        margin-left: 20%;
+        margin-left: 25%;
     }
     .page-link{
         color: #492809;
@@ -350,7 +385,8 @@
                 <?php include "saly.html"; ?>
             </div>
 
-            <div class="col-md-8">
+            <!-- This section is used to display all users -->
+            <div class="col-md-10">
                 <div class="table-client">
                     <table class="table table-bordered">
                         <h2>Liste des partenaires</h2>
@@ -382,6 +418,36 @@
                     </ul>
                 </div>
             </div>
+            
+            <!-- Add some section: this one is for displying all treated files -->
+            <div class="col-md-12">
+                <div class="table-fichiersTraites">
+                    <table class="table table-bordered">
+                        <h2>Liste des fichiers traités</h2>
+                        <thead>
+                            <tr>
+                                <th class="id_fichier">Id Fichiers</th>
+                                <th class="nom_fichier"><i class="bi bi-file-earmark"></i>Nom du fichier</th>
+                                <th class="chemin_fichier"><i class="bi bi-filetype-xlsx"></i>Chemin du fichier</th>
+                                <th class="date_creation"><i class="bi bi-calendar-event"></i>Date de création du fichier</th>
+                                <th class="action_fichier">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($resultsFiles as $file): ?>
+                                <tr>
+                                    <td><?php echo $file['id_fichier'] ?></td>
+                                    <td><?php echo $file['nom_fichier'] ?>  </td>
+                                    <td><?php echo $file['chemin_fichier'] ?>   </td>
+                                    <td><?php echo $file['date_creation']?>     </td>
+                                    <td><i class="bi bi-download"></i></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -410,13 +476,21 @@
         // Afficher ou masquer les éléments en fonction de l'élément sélectionné
         if (selected_item === 'Gestion des fichiers') {
             $(".getFiles").show();
-            $(".table-client").hide(); // Masquer la table des clients
+            $(".table-client").hide(); // Masquer le tableau des clients
+            $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
         } else if (selected_item === 'Gestion Partenaires') {
             $(".getFiles").hide();
             $(".table-client").show(); // Afficher la table des clients
+            $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
+
+        } else if (selected_item === 'Traitements') {
+            $(".getFiles").hide();
+            $(".table-client").hide(); // Afficher la table des clients
+            $(".table-fichiersTraites").show(); //Masquer la table des fichiers traités
         } else {
             $(".getFiles").hide();
-            $(".table-client").hide(); // Masquer la table des clients pour d'autres éléments
+            $(".table-client").hide(); // Afficher la table des clients
+            $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités        }
         }
     });
 
