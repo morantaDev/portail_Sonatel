@@ -5,6 +5,6 @@
     session_destroy();
 
     // Rediriger vers la page de connexion après la déconnexion
-    header("Location: index.html");
+    header("Location: index.php");
     exit();
 ?>

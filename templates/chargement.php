@@ -160,7 +160,9 @@ try {
                                 }
                                         
                                 echo "Importation réussie.";
+                                flash('successful_import', 'Importation réussie.');
                         } else {
+                            flash('existing_billing', 'Un fichier billing de la même date existe déjà dans la base de données', 'red');
                             die ("Un fichier billing de la même date existe déjà dans la base de données");
                         }
 
@@ -186,7 +188,7 @@ try {
                         }
                         $rowData = $worksheet->rangeToArray('A' . $row->getRowIndex() . ':' . $highestColumn . $row->getRowIndex(), null, true, false);
 
-                        var_dump($rowData); 
+                        // var_dump($rowData); 
 
 
                         $insertCatalogue->execute([$rowData[0][0], $rowData[0][1],$rowData[0][2], $rowData[0][3]]);

@@ -1,5 +1,5 @@
 <?php
-
+    include "flash.php";
 class DatabaseConnection {
     private $host = "localhost";
     private $port = "5432";
