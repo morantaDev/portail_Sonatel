@@ -379,7 +379,9 @@ try {
 
     // $data = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileName);
 
-
+    //Utilise ce code pour changer le format de la date
+    // $arr        =   explode('-',$date);
+    // $newDate    =   $arr[2].'-'.$arr[1].'-'.$arr[0];
 
 } catch (Exception $e) {
     echo $e->getMessage();

@@ -1,3 +1,9 @@
+<?php
+    session_start();
+    include 'flash.php';
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Inclure le fichier CSS de Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"> -->
     <title>Login page</title>
 
@@ -120,6 +127,7 @@
                         </span>
                     </button>
                 </div>
+                <?php echo flash('error_login')?>
             </div>
         </form>
     </div>
@@ -129,3 +137,11 @@
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> -->
 </body>
 </html>
+<script>
+    // Utilisez jQuery pour masquer le message après un délai
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('#flash-message').fadeOut('slow');
+        }, 2000); 
+    });
+</script>

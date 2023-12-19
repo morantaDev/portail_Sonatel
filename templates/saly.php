@@ -1,3 +1,6 @@
+<?php 
+    include 'flash.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,7 +50,9 @@
             <input type="submit" value="Envoyer" />
         </div>
     </form>
-
+    
+    <!-- Afficher ici le message d'erreur -->
+    <div class="displayFlashMessage"><?php flash('existing_billing') ?></div>
     <script>
         function afficherDetailsFichier() {
             console.log("Fonction afficherDetailsFichier appelée.");  // Ajoutez cette ligne

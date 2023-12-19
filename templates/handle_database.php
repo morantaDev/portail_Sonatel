@@ -1,9 +1,11 @@
 <?php
-
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
     session_start();
 
     require_once "connexion.php";
-
+    include "flash.php";
     require_once "../helpers/database_class.php";
 
     try {
@@ -147,17 +149,23 @@
             $user = $queryUser->fetch(PDO::FETCH_ASSOC);
 
             if (!$user) {
-                die("Cet utilisateur n'existe pas ou le mot de passse n'est pas correct dans la base de données");
+                // die("Cet utilisateur n'existe pas ou le mot de passse n'est pas correct dans la base de données");
+                header ('Location: index.php');
+
+                flash('error_login','Cet utilisateur n\'existe pas ou le mot de passse n\'est pas correct dans la base de données', 'red');
+
                 exit();
             } else {
                 $_SESSION['UserName'] = $UserName;
                 $_SESSION['User'] = $user;
+                flash('login','Utilisateur connecté avec succès');
 
             }
         }
 
         // Assurez-vous qu'aucune sortie n'est générée avant l'en-tête de redirection
         // ob_start();
+
         
         header ('Location: with_sidebar_page.php');
         exit();

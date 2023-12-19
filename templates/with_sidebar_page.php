@@ -1,5 +1,7 @@
 <?php
+    session_start();
     include "../models/client_class.php";
+    include "flash.php";
 
     $db = new DatabaseConnection();
     $db = $db->getConnection();
@@ -34,7 +36,7 @@
     // Vérifier si UserName est présent dans la session
     if (!isset($_SESSION['UserName'])) {
         // Rediriger vers la page de connexion si UserName n'est pas présent
-        header("Location: index.html");
+        header("Location: index.php");
         exit();
     }
 
@@ -58,12 +60,17 @@
         margin: 0;
         width: 100%;
         height: 100%;
+        background-color: beige; /* Couleur de fond de la page */
+        /*margin: 20px;  Supprime la marge par défaut du body */
+        font-family: Arial, sans-serif; /* Police de caractères */
     }
     .full_container{
         /* border: 1px solid black; */
+        /* position: relative; */
         width: 100%;
         height: 100vh;
         margin-top: 79px;
+        z-index: 2;
     }
     .main_container{
         /* border: 1px solid black; */
@@ -81,7 +88,7 @@
         padding: 0;
         position: relative;
         top: 78px;
-        z-index: 1;
+        /* z-index: 2; */
         left: -250px;
         position: absolute;
         transition: left 0.3s;
@@ -168,8 +175,9 @@
         height: 79px; 
         left: 0px; 
         top: 0px; 
-        position: absolute; 
+        position: fixed; 
         background: #492809;
+        z-index: 2;
     }
     .search{
         padding: 15px;
@@ -257,8 +265,8 @@
         margin: 0 auto;
         margin-top: 20px;
         overflow-x: auto;
-        margin-left: 5%;
-        width: 90%; 
+        /* margin-right: 5%; */
+        width: 100%; 
     }
     .table-fichiersTraites th{
         background-color: #492809;
@@ -327,6 +335,9 @@
         color: #492809;
 
     }
+    tbody{
+        text-align: center;
+    }
 </style>
 </head>
 <body>
@@ -360,8 +371,10 @@
     </div>
 </div>
 <div class="full_container">
+
     <div class="main_container">
         <!-- Ajouter le Header ici -->
+
         <div class="sidebar">
             <!-- <button class="btn btn-primary">FERMER</button> -->
             <h1>Tableau de bord</h1>
@@ -369,7 +382,7 @@
                 <li class="menu_item">Accueil</li>
                 <li class="menu_item">Gestion Partenaires</li>
                 <li class="menu_item">Gestion des fichiers</li>
-                <li class="menu_item">Traitements</li>
+                <li class="menu_item">Fichiers traités</li>
                 <li class="menu_item">Historiques</li>
             </ul>
             <span id="list_button">
@@ -381,8 +394,9 @@
         <div class="content">
             <!-- Toutes les tableaux seront affichés içi -->
             <p><?php echo "Bienvenue" ." ".$UserName ;?></p>
+            <p><?php echo flash('login')?></p>
             <div class="getFiles">
-                <?php include "saly.html"; ?>
+                <?php include "saly.php"; ?>
             </div>
 
             <!-- This section is used to display all users -->
@@ -434,16 +448,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($resultsFiles as $file): ?>
+                            <?php $count=0;foreach ($resultsFiles as $file): ?>
                                 <tr>
-                                    <td><?php echo $file['id_fichier'] ?></td>
-                                    <td><?php echo $file['nom_fichier'] ?>  </td>
-                                    <td><?php echo $file['chemin_fichier'] ?>   </td>
-                                    <td><?php echo $file['date_creation']?>     </td>
-                                    <td><i class="bi bi-download"></i></td>
+                                    <td class="id_fichier"><strong><?php echo $file['id_fichier'] ?></strong></td>
+                                    <td><strong><?php echo $file['nom_fichier'] ?></strong></td>
+                                    <td><strong><?php echo $file['chemin_fichier']?></strong></td>
+                                    <td><strong><?php echo $file['date_creation']?></strong></td>
+                                    <td id="<?php echo $count ?>"><i class="bi bi-download"></i></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
+                        <tfooter>
+                            <?php echo flash('error_download') ?>
+                        </tfooter>
                     </table>
                 </div>
             </div>
@@ -483,7 +500,7 @@
             $(".table-client").show(); // Afficher la table des clients
             $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
 
-        } else if (selected_item === 'Traitements') {
+        } else if (selected_item === 'Fichiers traités') {
             $(".getFiles").hide();
             $(".table-client").hide(); // Afficher la table des clients
             $(".table-fichiersTraites").show(); //Masquer la table des fichiers traités
@@ -519,6 +536,38 @@
             }
         });
     }
+
+    // Utilisez jQuery pour masquer le message après un délai
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('#flash-message').fadeOut('slow');
+        }, 2000); // 5000 millisecondes (5 secondes)
+    });
+
+    $(".table-fichiersTraites td").on('click', function(){
+        // var download_item = $(this).attr("id");
+
+        var idFichier = parseInt($(this).closest('tr').find('td.id_fichier').text());
+
+        console.time('clickHandler');
+        alert(idFichier);
+
+        $.ajax({
+            url: 'generate_Ticket_SMSPlus.php',
+            type: 'POST',
+            data: { idFichier: idFichier },
+            success: function (response) {
+                // Mettre à jour le contenu de la div avec le nouveau HTML
+                alert(response);
+                console.timeEnd('clickHandler');
+            },
+            error: function () {
+                console.log('Erreur lors du chargement de la page');
+                console.timeEnd('clickHandler');
+            }
+        });
+    })
+
 });
 
 </script>
