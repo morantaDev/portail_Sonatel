@@ -16,6 +16,7 @@
         $tablesQuery = [
             "CREATE TABLE IF NOT EXISTS client (
                         id_client SERIAL PRIMARY KEY,
+                        compte VARCHAR(200) NOT NULL,
                         nomclient VARCHAR(200) UNIQUE NOT NULL
                     );
             ",
@@ -125,7 +126,13 @@
                     MTN_TCK INT NOT NULL,
                     KTCK VARCHAR(255) NOT NULL,
                     FOREIGN KEY (id_fichier) REFERENCES archive_ticket(id_fichier)
-                );"
+                );",
+                "CREATE TABLE IF NOT EXISTS historique (
+                    id SERIAL PRIMARY KEY,
+                    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    action VARCHAR(255)
+                );
+                "
         ];
         foreach($tablesQuery as $query){
             $db -> exec($query);

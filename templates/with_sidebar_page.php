@@ -1,5 +1,6 @@
 <?php
     session_start();
+
     include "../models/client_class.php";
     include "flash.php";
 
@@ -31,7 +32,6 @@
     $selectedClients = array_slice($clients, $start, $perPage);
 
 
-    session_start();
     
     // Vérifier si UserName est présent dans la session
     if (!isset($_SESSION['UserName'])) {
@@ -43,6 +43,12 @@
     // Si UserName est présent, récupérez la valeur
     $UserName = $_SESSION['UserName'];
 
+
+    //Get all informations from the historical table
+    $HistoSql = "SELECT * FROM historique";
+    $Historiques = $db->prepare($HistoSql);
+    $Historiques->execute();
+    $AllHistoriques = $Historiques->fetchAll(PDO::FETCH_ASSOC);
     
 ?>
 <!DOCTYPE html>
@@ -54,13 +60,20 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
 <title>Main page</title>
 <style>
     body {
         margin: 0;
         width: 100%;
-        height: 100%;
-        background-color: beige; /* Couleur de fond de la page */
+        height: 100vh;
+        background-color: none; /* Couleur de fond de la page */
         /*margin: 20px;  Supprime la marge par défaut du body */
         font-family: Arial, sans-serif; /* Police de caractères */
     }
@@ -83,7 +96,7 @@
         width: 250px;
         min-width: 250px;
         max-width: 250px;
-        background: #DEC1A7;
+        background: rgb(220,220,220);
         margin: 0;
         padding: 0;
         position: relative;
@@ -96,11 +109,13 @@
     .content{
         width: 100%;
         padding-left: 2%;
-
+        background-image: url('../assets/sonatel_republique.jpeg');
+        background-repeat: no-repeat;
+        background-size: 100%;
     }
     .sidebar h1{
         text-align: center;
-        background-color: #caa27f;
+        background-color: rgb(105,105,105);
         padding: 20px 0;
         position: relative;
         top: -2px;
@@ -124,7 +139,7 @@
     }
     .menu_item:hover{
         cursor: pointer;
-        background-color: #492809;
+        background-color: 	rgb(105,105,105);
         color: white;
         font-size: 18px;
         padding: 10%;
@@ -162,7 +177,7 @@
         color: white;
         position: relative;
         top: -10%;
-        background-color:#492809;
+        background-color:	rgb(105,105,105);
         left: 227px;
         padding: 10px 5px 10px 20px;
         border-radius: 50%;
@@ -176,7 +191,7 @@
         left: 0px; 
         top: 0px; 
         position: fixed; 
-        background: #492809;
+        background: black;
         z-index: 2;
     }
     .search{
@@ -265,11 +280,13 @@
         margin: 0 auto;
         margin-top: 20px;
         overflow-x: auto;
-        /* margin-right: 5%; */
-        width: 100%; 
+        /* margin-right: 0%; */
+        width: 93%; 
+        margin-left: 40px;
+        /* transition: left 0s; */
     }
     .table-fichiersTraites th{
-        background-color: #492809;
+        background-color: rgb(255,140,0);
         color: #fff;
         text-align: center;
         font-size: 18px;
@@ -278,7 +295,7 @@
         transform: scale(1.02);
     }
     #search-addon{
-        background-color: #492809;
+        background-color: black;
     }
     .table-client {
         margin: 0 auto; /* Ajoutez cette ligne pour centrer le tableau horizontalement */
@@ -288,7 +305,7 @@
         width: 90%; /* Ajustez la largeur du tableau selon vos besoins */
     }
 
-    .table-client table {
+    .table-client table, .table-Historiques table {
         background-color: #fff;
         border: none;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -296,12 +313,12 @@
         width: 100%;
     }
 
-    .table-client table:hover {
+    .table-client table:hover, .table-Historiques table:hover {
         transform: scale(1.02);
     }
 
-    .table-client th {
-        background-color: #492809;
+    .table-client th, .table-Historiques th {
+        background-color: rgb(255,140,0);
         color: #fff;
         text-align: center;
         font-size: 18px;
@@ -338,6 +355,13 @@
     tbody{
         text-align: center;
     }
+    .table-Historiques, .table-statistiques{
+        display: none;
+    }
+    .table-statistiques button{
+        color: red;
+    }
+    
 </style>
 </head>
 <body>
@@ -392,8 +416,6 @@
             </span>
         </div>
         <div class="content">
-            <!-- Toutes les tableaux seront affichés içi -->
-            <p><?php echo "Bienvenue" ." ".$UserName ;?></p>
             <p><?php echo flash('login')?></p>
             <div class="getFiles">
                 <?php include "saly.php"; ?>
@@ -401,12 +423,12 @@
 
             <!-- This section is used to display all users -->
             <div class="col-md-10">
-                <div class="table-client">
+                <div class="table-client" id="table-client">
                     <table class="table table-bordered">
                         <h2>Liste des partenaires</h2>
                         <thead>
                             <tr>
-                                <th class="id_client">Id Partenaire</th>
+                                <th class="id_client">COMPTE</th>
                                 <th class="nom_client"><i class="bi bi-person"></i>PARTENAIRE</th>
                                 <th class="action">Action</th>
                             </tr>
@@ -414,9 +436,9 @@
                         <tbody>
                             <?php foreach ($selectedClients as $client): ?>
                                 <tr>
-                                    <td><?php echo $client['id_client']; ?></td>
+                                    <td><?php echo $client['compte']; ?></td>
                                     <td><strong><?php echo strtoupper($client['nomclient']);?></strong></td>
-                                    <td style="display:flex;"><i class="bi bi-pencil-square"></i><i class="bi bi-trash3-fill"></i></td>
+                                    <td style="display:flex;" data-class="<?php echo $client['nomclient']; ?>"><i class="bi bi-eye show_stat" style="" title="voir stat"></i><i class="bi bi-pencil-square edit_client" title ="modifier partenaire"></i><i class="bi bi-save save_client" title="enregistrer modif"></i><i class="bi bi-trash3-fill delete_client" title="supprimer partenaire"></i></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -454,7 +476,34 @@
                                     <td><strong><?php echo $file['nom_fichier'] ?></strong></td>
                                     <td><strong><?php echo $file['chemin_fichier']?></strong></td>
                                     <td><strong><?php echo $file['date_creation']?></strong></td>
-                                    <td id="<?php echo $count ?>"><i class="bi bi-download"></i></td>
+                                    <td id="<?php echo $count ?>"><i class="bi bi-download download_file" style="cursor: pointer; font-size: 25px;"></i></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        <tfooter>
+                            <p><?php echo flash('success_download') ?></p>
+                        </tfooter>
+                    </table>
+                </div>
+            </div>
+
+
+            <!-- Add some section: this one is for displying all historical informations of our appli -->
+            <div class="col-md-12">
+                <div class="table-Historiques">
+                    <table class="table table-bordered">
+                        <h2>Historiques</h2>
+                        <thead>
+                            <tr>
+                                <th class="id_historiqque">Action</th>
+                                <th class="date_creation"><i class="bi bi-calendar-event"></i>Date de création</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $count=0;foreach ($AllHistoriques as $historique): ?>
+                                <tr>
+                                    <td><strong><?php echo $historique['action'] ?></strong></td>
+                                    <td><strong><?php echo $historique['date_creation']?></strong></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -464,6 +513,52 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Display statistics of any client here -->
+            <div class="col-md-12">
+                <div class="table-statistiques">
+                    <button style="padding: 7px 25px; font-size: 20px; border-radius: 10%; color: black; background-color: rgb(255,140,0); font-weight: bold;"><i class="bi bi-arrow-left"></i>RETOUR</button>
+
+                    <!-- Search any user compte stat and display it -->
+                    <div class="row">
+                        <div class="col-sm-12" align="center">
+                            <p style="font-size: 30px; padding-bottom: 20px"><input type="text" id="datepicker" style="margin-right:15px;" placeholder="Choisir une date"><button style="background-color: black; color: white; margin-left: -20px; margin-top: 10%;">Recherche</button></p>
+                        </div>            
+                    </div>
+
+                <div class="full_stat" style="background-color: black; width: 97%; height: 100%;">
+                    <h2 style="color: white; text-align: center; padding-top: 30px; font-size: 40px">Statistiques</h2>
+                    
+                    <h4 style="color: white; padding-bottom: 20px; padding-left: 30px;">Numéro de compte: <Strong>WTS02543</Strong></h4>
+                    
+                    <h5 style="color: white; padding-bottom: 20px; padding-left: 30px;">Date du ticket: <strong>31 Décembre 2023</strong></h4>
+                    <!-- Display all statistics here -->
+                    <div class="stat_content" style="display: flex; align-content: center; width: 100%; border: 1px solid red; padding-left: 25%">
+                        <div class="card text-bg-secondary mb-3" style="max-width: 18rem; margin-right: 5%;">
+                            <div class="card-header">Nombre SMS National</div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="text-align: center; font-size: 40px;">345</h5>
+                                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                            </div>
+                        </div>
+                        <div class="card text-bg-success mb-3" style="max-width: 18rem; margin-right: 5%">
+                            <div class="card-header">Nombre SMS international</div>
+                            <div class="card-body">
+                                <h5 class="card-title" style="text-align: center; font-size: 40px;">3456</h5>
+                            </div>
+                        </div>
+                        <div class="card text-bg-danger mb-3" style="max-width: 18rem; margin-right: 5%">
+                        <div class="card-header">Montant Ticket</div>
+                        <div class="card-body">
+                            <h5 class="card-title" style="text-align: center; font-size: 40px;">1320000</h5>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+            </div>
+
 
         </div>
     </div>
@@ -475,100 +570,234 @@
 
 <script>
     $(document).ready(function (e) {
-    console.log("Chargement de la page terminé.");
+        console.log("Chargement de la page terminé.");
 
-    // Variable pour stocker l'élément sélectionné
-    var selectedMenuItem = "";
+        // Variable pour stocker l'élément sélectionné
+        var selectedMenuItem = "";
 
-    $("#list_button").on('click', function () {
-        $(".sidebar").toggleClass("open");
-        $(".content").toggleClass("collapsed");
-        $("#list_button").toggleClass("open");
-    });
+        $("#list_button").on('click', function () {
+            $(".sidebar").toggleClass("open");
+            $(".content").toggleClass("collapsed");
+            $("#list_button").toggleClass("open");
+        });
 
-    $(".menu_list li").click(function () {
-        var selected_item = $(this).text().trim(); // Supprimer les espaces indésirables
-        console.log(selected_item);
+        $(".menu_list li").click(function () {
+            var selected_item = $(this).text().trim(); // Supprimer les espaces indésirables
+            console.log(selected_item);
 
-        // Afficher ou masquer les éléments en fonction de l'élément sélectionné
-        if (selected_item === 'Gestion des fichiers') {
-            $(".getFiles").show();
-            $(".table-client").hide(); // Masquer le tableau des clients
-            $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
-        } else if (selected_item === 'Gestion Partenaires') {
-            $(".getFiles").hide();
-            $(".table-client").show(); // Afficher la table des clients
-            $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
+            // Afficher ou masquer les éléments en fonction de l'élément sélectionné
+            if (selected_item === 'Gestion des fichiers') {
+                $(".getFiles").show();
+                $(".table-client").hide(); // Masquer le tableau des clients
+                $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
+                $(".table-Historiques").hide(); //Masquer la table des historiques 
+            } else if (selected_item === 'Gestion Partenaires') {
+                $(".getFiles").hide();
+                $(".table-client").show(); // Afficher la table des clients
+                $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
+                $(".table-Historiques").hide(); //Masquer la table des historiques 
+            } else if (selected_item === 'Fichiers traités') {
+                $(".getFiles").hide();
+                $(".table-client").hide(); // Afficher la table des clients
+                $(".table-fichiersTraites").show(); //Masquer la table des fichiers traités
+                $(".table-Historiques").hide(); //Masquer la table des historiques 
+            } else if (selected_item === 'Historiques'){
+                $(".getFiles").hide();
+                $(".table-client").hide(); // Afficher la table des clients
+                $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités        }
+                $(".table-Historiques").show(); //Masquer la table des historiques 
+            }else {
+                $(".getFiles").hide();
+                $(".table-client").hide(); // Afficher la table des clients
+                $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités        }
+                $(".table-Historiques").hide(); //Masquer la table des historiques 
+            }
+        });
 
-        } else if (selected_item === 'Fichiers traités') {
-            $(".getFiles").hide();
-            $(".table-client").hide(); // Afficher la table des clients
-            $(".table-fichiersTraites").show(); //Masquer la table des fichiers traités
-        } else {
-            $(".getFiles").hide();
-            $(".table-client").hide(); // Afficher la table des clients
-            $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités        }
+        // Gérer la pagination
+        $(document).on('click', '.table-client .pagination a.page-link', function (e) {
+            e.preventDefault();
+            // Charger la page suivante via AJAX
+            var page = $(this).attr("href").split("=")[1];
+            loadPage(page);
+        });
+
+        function loadPage(page) {
+            // Effectuer une requête AJAX pour charger le contenu du tableau
+            console.log('Chargement de la page', page);
+
+            $.ajax({
+                url: 'charger_page_clients.php?page=' + page,
+                type: 'GET',
+                success: function (response) {
+                    // Mettre à jour le contenu de la div avec le nouveau HTML
+                    $(".table-client").html(response);
+                    console.log(response);
+                },
+                error: function () {
+                    console.log('Erreur lors du chargement de la page');
+                }
+            });
         }
-    });
 
-    // Gérer la pagination
-    $(document).on('click', '.table-client .pagination a.page-link', function (e) {
-        e.preventDefault();
-        // Charger la page suivante via AJAX
-        var page = $(this).attr("href").split("=")[1];
-        loadPage(page);
-    });
+            setTimeout(function() {
+                $('#flash-message').fadeOut('slow');
+            }, 2000); // 5000 millisecondes (5 secondes)
 
-    function loadPage(page) {
-        // Effectuer une requête AJAX pour charger le contenu du tableau
-        console.log('Chargement de la page', page);
+            
 
-        $.ajax({
-            url: 'charger_page_clients.php?page=' + page,
-            type: 'GET',
-            success: function (response) {
-                // Mettre à jour le contenu de la div avec le nouveau HTML
-                $(".table-client").html(response);
-                console.log(response);
-            },
-            error: function () {
-                console.log('Erreur lors du chargement de la page');
-            }
+        $(".download_file").on('click', function(){
+            // var download_item = $(this).attr("id");
+            var row = $(this).closest("tr"); // Récupérer la ligne parente
+            var idFichier = row.find("td:eq(0)").text();;
+
+            console.time('clickHandler');
+            alert(idFichier);
+
+            $.ajax({
+                url: 'generate_Ticket_SMSPlus.php',
+                type: 'POST',
+                // dataType: 'json',
+                data: { idFichier: idFichier },
+                success: function (response) {
+                    // Mettre à jour le contenu de la div avec le nouveau HTML
+                    alert(response);
+                    $('.table-Historiques tbody').empty();
+
+                    response.forEach(function (historique) {
+                        $('.table-Historiques tbody').append(
+                            '<tr>' +
+                            '<td><strong>' + historique.action + '</strong></td>' +
+                            '<td><strong>' + historique.date_creation + '</strong></td>' +
+                            '</tr>'
+                        );
+                    });
+                    // // Actualiser la page après la mise à jour
+                    // location.reload();
+
+                    console.timeEnd('clickHandler');
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log('Erreur lors de la requête AJAX : ' + textStatus + ' ' + errorThrown);
+                    console.log(xhr.responseText); // Afficher la réponse exacte du serveur
+                    console.timeEnd('clickHandler');
+                }
+            });
+
+        })
+
+        $(".edit_client").on('click', function(){
+            var row = $(this).closest("tr"); // Récupérer la ligne parente
+
+            // Rendre les cellules de la ligne éditables
+            row.find("td").attr("contenteditable", "true");
+
+            // Ajouter une classe pour styliser les cellules éditables
+            row.find("td").addClass("editable");
+
+            // Désactiver le bouton "Éditer" pour éviter les conflits
+            $(this).prop("disabled", true);
+
+            // Activer le bouton "Enregistrer" pour capturer les modifications
+            row.find(".save_client").prop("disabled", false);
+
+                // Récupérer l'ancien nom du client
+            var ancienNomClient = row.find("td:eq(1)").text();
+            row.data("ancien-nom", ancienNomClient);
         });
-    }
 
-    // Utilisez jQuery pour masquer le message après un délai
-    $(document).ready(function() {
-        setTimeout(function() {
-            $('#flash-message').fadeOut('slow');
-        }, 2000); // 5000 millisecondes (5 secondes)
+        $(".save_client").on('click', function(){
+            alert("voulez-vous sauvegarder les modifications?");
+            var row = $(this).closest("tr"); // Récupérer la ligne parente
+
+            // Récupérer les valeurs modifiées dans chaque cellule
+            var idClient = row.find("td:eq(0)").text();
+            var newNomClient = row.find("td:eq(1)").text();
+            var ancienNomClient = row.data("ancien-nom");
+
+            alert(idClient);
+            alert(newNomClient);
+
+            // Effectuer une requête AJAX pour enregistrer les modifications
+            $.ajax({
+                url: "edit_client.php",
+                type: "POST",
+                data: {idClient: idClient, ancienNomClient : ancienNomClient, newNomClient: newNomClient},
+                success: function(response){
+                    // console.log("Les modifications ont été enregistrées avec succès");
+                    alert(response);
+                },
+                error: function(){
+                    console.log('Erreur lors de la tentative d\'enregistrement des modifications');
+                }
+            });
+
+            // Rendre les cellules de la ligne non éditables
+            row.find("td").removeAttr("contenteditable");
+
+            // Supprimer la classe "editable" des cellules
+            row.find("td").removeClass("editable");
+
+            // Désactiver le bouton "Enregistrer"
+            $(this).prop("disabled", true);
+
+            // Réactiver le bouton "Éditer"
+            row.find(".edit_client").prop("disabled", false);
+        });
+
+
+
+
+        //Delete client from de database
+        $(".delete_client").on('click', function(){
+        var nomClient = $(this).parent().data("class");
+        alert(nomClient);
+        $.ajax({
+                url:"delete_client.php",
+                type: "POST",
+                data: {nomClient: nomClient},
+                success: function(response){
+                    alert(response);
+                },
+                error: function(){
+                    console.log('Erreur lors de la tentative de suppression du client.');
+                }
+            });
+        });
+        
+        $(".show_stat").on('click', function(){
+            $(".table-client").hide();
+            $(".table-statistiques").show();
+            var nomClient = $(this).parent().data("class");
+            $.ajax({
+                url: "statistiques.php",
+                type: "POST",
+                data: {nomClient: nomClient},
+                success: function(response){
+                    alert(response);
+                },
+                error: function(){
+                    console.log("Erreur lors d'une tentative d'affichage de la page statistique");
+                }
+            })
+
+        });
+
+        $(".table-statistiques button").on('click', function(){
+            $(".table-statistiques").hide();
+            $(".table-client").show();
+        });
+
+
+        // Data Picker Initialization
+        $(function(){
+            $("#datepicker").datepicker({
+                showButtonPanel: true
+            });       
+        });
+
     });
 
-    $(".table-fichiersTraites td").on('click', function(){
-        // var download_item = $(this).attr("id");
-
-        var idFichier = parseInt($(this).closest('tr').find('td.id_fichier').text());
-
-        console.time('clickHandler');
-        alert(idFichier);
-
-        $.ajax({
-            url: 'generate_Ticket_SMSPlus.php',
-            type: 'POST',
-            data: { idFichier: idFichier },
-            success: function (response) {
-                // Mettre à jour le contenu de la div avec le nouveau HTML
-                alert(response);
-                console.timeEnd('clickHandler');
-            },
-            error: function () {
-                console.log('Erreur lors du chargement de la page');
-                console.timeEnd('clickHandler');
-            }
-        });
-    })
-
-});
 
 </script>
 </body>
