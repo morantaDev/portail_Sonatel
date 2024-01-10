@@ -98,24 +98,22 @@ try {
                             die("Erreur lors du formatage de la date.");
                         }
 
-                        // Obtenez le dernier jour du mois
-                        $lastDayOfMonth = $formattedMonthObject->format('t-m-Y');
-                        echo $lastDayOfMonth;
 
-                        // Ajoutez le dernier jour du mois au nom du fichier
-                        $newFileName = pathinfo($excelFilePath, PATHINFO_FILENAME) . '.' . $lastDayOfMonth . '.xlsx';
-
+                        
                         // Affichez le nouveau nom du fichier
                         echo "Nouveau nom du fichier : $newFileName\n";
                         
                         // Obtenez la date formatée sous forme de chaîne
-                        $formattedMonth = $formattedMonthObject->format('Y-m-d');
+                        $formattedMonth = $formattedMonthObject->format('t/m/Y');
                         echo "Mois de facturation : $formattedMonth\n";
+                        
+                        // Ajoutez le dernier jour du mois au nom du fichier
+                        $newFileName = pathinfo($excelFilePath, PATHINFO_FILENAME) . '.' . $formattedMonth . '.xlsx';
 
                     
                         //Faire une requête pour vérifier si un fichier billing portant la même date n'est pas déjà insérer
                         $queryDateFile = $db->prepare("SELECT * FROM billing WHERE mois_fac =? ");
-                        $queryDateFile->execute([$lastDayOfMonth]);
+                        $queryDateFile->execute([$formattedMonth]);
                         $resultDate = $queryDateFile->fetch(PDO::FETCH_ASSOC);
                     
                         if (!$resultDate) {          
@@ -125,10 +123,10 @@ try {
                             $insertQuery = $db->prepare("INSERT INTO billing (client, compte, nombre_sms_mois, libelle, destination, mois_fac, id_utilisateur) VALUES (?, ?, ?, ?, ?, ?, ?)");
                             
                             // Préparez la requête d'insertion pour les clients
-                            $insertClient = $db->prepare("INSERT INTO client (nomclient) VALUES (?)");
+                            $insertClient = $db->prepare("INSERT INTO client (compte, nomclient) VALUES (?, ?)");
         
                             // Préparez la requête de vérification si le client existe déjà
-                            $clientExists = $db->prepare("SELECT COUNT(*) AS count FROM client WHERE nomclient = ?");
+                            $clientExists = $db->prepare("SELECT COUNT(*) AS count FROM client WHERE compte = ?");
         
         
         
@@ -142,12 +140,12 @@ try {
                                 // var_dump($rowData);
                         
                                     // Exécuter la requête avec les valeurs liées
-                                    $insertQuery->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2], $rowData[0][4], $rowData[0][3], $lastDayOfMonth, $User_Id]);
+                                    $insertQuery->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2], $rowData[0][4], $rowData[0][3], $formattedMonth, $User_Id]);
                                 //  $insertClient ->execute([$rowData[0][0]]);
         
             
                                 // Exécuter la requête pour vérifier si le client existe déjà
-                                $clientExists->execute([$rowData[0][0]]);
+                                $clientExists->execute([$rowData[0][1]]);
                                 $clientExistsCount = $clientExists->fetchColumn();
         
                                 if ($clientExistsCount > 0) {
@@ -155,7 +153,7 @@ try {
                                     echo "Le nom du client existe déjà.";
                                     } else {
                                         // Le nom du client n'existe pas encore, donc l'insérer
-                                        $insertClient->execute([$rowData[0][0]]);
+                                        $insertClient->execute([$rowData[0][1], $rowData[0][0]]);
                                     }        
                                 }
                                         
@@ -252,7 +250,28 @@ try {
 
                 } elseif (str_contains($emplacementDestination, 'billing_aggre')){
                     //ajouter le code içi
-                }
+                        $excelFilePath = $emplacementDestination;
+                        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFilePath);
+                        $BillingAggSheet = $spreadsheet->getActiveSheet();
+                        $highestColumn = $BillingAggSheet->getHighestDataColumn();
+    
+                        // Requête pour insérer le fichier au niveau de la base de données
+                        $queryAggr = $db->prepare("INSERT INTO billing_aggregateur () VALUES ()");
+    
+                        // Préparez la requête de vérification si le client existe déjà
+    
+                        foreach ($BillingAggSheet->getRowIterator() as $index => $row) {
+                            if ($index === 1) {
+                                continue;
+                            }
+                            $rowData = $BillingAggSheet->rangeToArray('A' . $row->getRowIndex() . ':' . $highestColumn . $row->getRowIndex(), null, true, false);
+    
+                            // Le nom du client n'existe pas encore, donc l'insérer
+                            $queryAggr->execute([]);
+                            
+                        }
+                        echo "Importation réussie.";    
+                    }
             }
         }
 

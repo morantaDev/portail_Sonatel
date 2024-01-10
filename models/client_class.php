@@ -17,15 +17,18 @@ class Db_client {
     }
 
     public function getAllClients(){
-        $sql = "SELECT * FROM client";
+        $sql = "SELECT * FROM client ORDER BY nomclient";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function deleteClient($id){
-        $query = "SELECT * FROM client WHERE id=?";
-        $getClient = $this->db->prepare($query);
-        $getClient->execute([$id]);
+        $sql = "DELETE FROM client WHERE id=?";
+        $stmt = $this->db->prepare($sql);
+        $success = $stmt->execute([$id]);
+        
+        // Retournez un indicateur de succès ou d'échec
+        return $success;
 
         if (!$getClient->fetch(PDO::FETCH_ASSOC)){
             die("Le client que vous voulez supprimer n'existe pas dans la base de données");

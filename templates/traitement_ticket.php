@@ -47,39 +47,64 @@ try {
         $compte['trafic_total'] = $traficTotal[$compte['ID']];
 
         // 
-        $compte['TYPE'] = substr($compte['compte'], 0, 3);
+        $compte['TYPE'] = substr($compte['ID'], 0, 3);
+
         
         // Ajouter l'entrée modifiée au tableau final
         $finalTable[] = $compte;   
     }
 
-    //Supprimer les doublons
-    $finalTable = array_map("unserialize", array_unique(array_map("serialize", $finalTable)));
+    $uniqueTable = [];
 
-    // echo count($finalTable);
+    foreach ($finalTable as $compte) {
+        $id = $compte['ID'];
+        if (!isset($uniqueTable[$id])) {
+            $uniqueTable[$id] = $compte;
+        } else {
+            // Si une entrée avec le même ID existe déjà, ajoutez le trafic au total existant
+            $uniqueTable[$id]['trafic_total'] += $compte['trafic'];
+        }
+    }
 
+    // Maintenant $uniqueTable contient les entrées uniques
+    $finalTable = array_values($uniqueTable);
+    
     
     
     $sqlCat = "SELECT * FROM catalogue";
     $queryCatalogue = $db->prepare($sqlCat);
     $queryCatalogue->execute();
     $resultCatalogue = $queryCatalogue->fetchAll(PDO::FETCH_ASSOC);
-
     
+
+    $mergedData = [];
+
     // Ingestion de catalogue
     foreach ($finalTable as &$row) {
+        $foundMatch = false; // Drapeau pour indiquer si une correspondance a été trouvée dans le catalogue
+        
         foreach ($resultCatalogue as $catalogueRow) {
             if ($row['TYPE'] === $catalogueRow['type'] && $row['CODE'] === $catalogueRow['code']) {
                 $row = array_merge($row, $catalogueRow);
-                break;
+                $mergedData[] = $row;
+                $foundMatch = true; // Une correspondance a été trouvée, définir le drapeau sur true
+                break; // Sortir de la boucle foreach du catalogue
             }
         }
+        
+        if (!$foundMatch) {
+            $mergedData[] = $row; // Ajouter la ligne au tableau mergedData si aucune correspondance n'a été trouvée
+        }
     }
+
+
+    
+    // print_r($mergedData);
 
     
     
     // Calcul du montant du ticket
-    foreach ($finalTable as &$row) {
+    foreach ($mergedData as &$row) {
         $row['MTN_TCK'] = $row['tarif'] * $row['trafic_total'];
         
         // Création de nouvelles colonnes
@@ -92,7 +117,7 @@ try {
     
     
     // Réarrangement colonnes
-    $finalTable = array_map(function ($row) {
+    $mergedData = array_map(function ($row) {
         return [
             'Compte' => $row['compte'],
             'NTICKET' => $row['NTICKET'],
@@ -104,32 +129,32 @@ try {
             'TARIF' => $row['tarif'],
             'KTCK' => $row['ktck'],
         ];
-    }, $finalTable);
+    }, $mergedData);
     
     
-    // var_dump($finalTable);
+    // var_dump($mergedData);
     
     
     
     //Filtres CBAO, WAVE & UBA
 
-    $cbaoSvn = array_filter($finalTable, function ($row) {
+    $cbaoSvn = array_filter($mergedData, function ($row) {
         return $row['Compte'] === 'MBK00002' && $row['KTCK'] === 'sms vers national';
     });
     
-    $cbaoSvi = array_filter($finalTable, function ($row) {
+    $cbaoSvi = array_filter($mergedData, function ($row) {
         return $row['Compte'] === 'MBK00002' && $row['KTCK'] === "sms vers l'international";
     });
     
-    $ubaSvn = array_filter($finalTable, function ($row) {
+    $ubaSvn = array_filter($mergedData, function ($row) {
         return $row['Compte'] === 'MBK00510' && $row['KTCK'] === 'sms vers national';
     });
     
-    $ubaSvi = array_filter($finalTable, function ($row) {
+    $ubaSvi = array_filter($mergedData, function ($row) {
         return $row['Compte'] === 'MBK00510' && $row['KTCK'] === "sms vers l'international";
     });
     
-    $finalTable = array_filter($finalTable, function ($row) {
+    $mergedData = array_filter($mergedData, function ($row) {
         return $row['Compte'] !== 'MBK00002' && $row['Compte'] !== 'MBK00510';
     });
     
@@ -152,14 +177,15 @@ try {
         $row['MTN_TCK'] = $row['TARIF'] * $row['trafic_total'];
     }
     
-    // Append finalTable
-    $finalTable = array_merge($finalTable, $cbaoSvn, $cbaoSvi, $ubaSvn, $ubaSvi);
+    // Append mer$mergedData
+    $mergedData = array_merge($mergedData, $cbaoSvn, $cbaoSvi, $ubaSvn, $ubaSvi);
     
-    foreach ($finalTable as &$row) {
+
+    foreach ($mergedData as &$row) {
         $row['trafic_total'] = strval($row['trafic_total']);
         $row['KTCK'] = $row['trafic_total'] . ' ' . $row['KTCK'];
         $row['MTN_TCK'] = (int)$row['MTN_TCK'];
-
+        
         //Récupérer la date du ticket
         $sql = "SELECT mois_fac as date FROM  billing LIMIT 1;";
         $query = $db->prepare($sql);
@@ -167,10 +193,15 @@ try {
         $resultDate = $query->fetch(PDO::FETCH_ASSOC);
         // print_r($resultDate['date']);
 
+        // $split_date = explode('-', $resultDate['date']);
+        // $newDate = $split_date[2]. '/' . $split_date[1] . '/' . $split_date[0];
+        
+        
+        
         $row['DATOP_TCK'] = $resultDate['date'];
     }
     
-    // print_r($finalTable);
+    // print_r($mergedData);
 
     //Récupérer le catalogue pour les engamgements
     $queryOSM = $db->prepare("SELECT * FROM osm");
@@ -180,17 +211,17 @@ try {
 
     // Définir une fonction personnalisée pour appliquer les transformations
     function applyTransformations($row) {
-        global $finalTable;
+        global $mergedData;
 
         $compte = $row['compte'];
         $tarif = $row['trafic_associe'];
         $montantEngagement = $row['montant'];
 
-        $conditions = array_filter($finalTable, function ($finalTableRow) use ($compte, $tarif) {
-            return $finalTableRow['Compte'] === $compte && strpos($finalTableRow['KTCK'], 'vers national') !== false;
+        $conditions = array_filter($mergedData, function ($mergedDataRow) use ($compte, $tarif) {
+            return $mergedDataRow['Compte'] === $compte && strpos($mergedDataRow['KTCK'], 'vers national') !== false;
         });
 
-
+        
         foreach ($conditions as &$condition) {
             if ($condition['trafic_associe'] <= $tarif) {
                 $condition['MTN_TCK'] = 0;
@@ -198,21 +229,21 @@ try {
             } elseif ($condition['trafic_associe'] > $tarif) {
                 $condition['MTN_TCK'] = (5 * $condition['trafic_associe']) - $montantEngagement;
             }
-
+            
             $condition['CA'] = 5 * $condition['trafic_associe'];
             // Pour ceux qui n'ont pas d'engagement
             $condition['MTN_TCK'] = $tarif * $condition['trafic_associe'];
         }
-
+        
         return $row;  // Retournez la ligne mise à jour
     }
-
+    
     // Appliquez la fonction à chaque ligne de la DataFrame 'engagements'
     $engagements = array_map('applyTransformations', $resultOSM);
-
-
+    
+    
     // Bon CA
-    foreach ($finalTable as &$row) {
+    foreach ($mergedData as &$row) {
         if (!isset($row['CA'])) {
             $row['CA'] = $row['MTN_TCK'];
         }
@@ -230,7 +261,7 @@ try {
     
     $ktckOff = $traficVersAutresOp . ' sms vers les autres opérateurs';
     
-    $finalTable = array_map(function ($row) {
+    $mergedData = array_map(function ($row) {
         return [
             'Compte' => $row['Compte'],
             'NTICKET' => $row['NTICKET'],
@@ -241,67 +272,67 @@ try {
             'MTN_TCK' => $row['MTN_TCK'],
             'KTCK' => $row['KTCK'],
         ];
-    }, $finalTable);
+    }, $mergedData);
     
     
     
     $query = $db->prepare("SELECT mois_fac FROM billing LIMIT 1");
     $query->execute();
     $lastDate=$query->fetchColumn();
+
+    $split_date = explode("-", $lastDate);
     
-    
-    // Convertir le tableau final en JSON
-    // $resultJson = json_encode($finalTable);
-    // echo $resultJson;
+    $new_date = $split_date[0] . '' . $split_date[1];
     
     // Export fichier
     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $worksheet = $spreadsheet->getActiveSheet();
-    
 
-    // var_dump($finalTable);
 
     // Ajoutez les en-têtes
-    $headers = array_keys($finalTable[0]);
+    $headers = array_keys($mergedData[0]);
     foreach ($headers as $colIndex => $header) {
-        echo $colIndex;
         $worksheet->setCellValueByColumnAndRow($colIndex + 1, 1, $header);
     }
 
     // Ajoutez les données
-    foreach ($finalTable as $rowIndex => $row) {
+    foreach ($mergedData as $rowIndex => $row) {
         for ($i = 0; $i < count($row); $i++) {
             $worksheet->setCellValueByColumnAndRow($i + 1, $rowIndex + 2, $row[array_keys($row)[$i]]);
         }
     }
 
 
-    $fileName = 'Tickets_SMS_PLUS_Bis_' . $lastDate . '.xlsx';
+    $fileName = 'Tickets_SMS_PLUS_Bis_' . $new_date . '.xlsx';
     $filePath = '/home/moranta/Downloads/output/' . $fileName; 
     
     // Save the Excel file to the server
     $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
     $writer->save($filePath);
 
-    // Insert data into archive_ticket table
+
+
+    // // Insert data into archive_ticket table
     $stmtArchive = $db->prepare("INSERT INTO archive_ticket (nom_fichier, chemin_fichier, date_creation) VALUES (?, ?, NOW())");
     $stmtArchive->bindParam(1, $fileName);
     $stmtArchive->bindParam(2, $filePath);
     $stmtArchive->execute();
 
-    // Retrieve the id_fichier of the inserted record
+    // // Retrieve the id_fichier of the inserted record
     $idFichier = $db->lastInsertId();
 
     // Read data from the Excel file
     $data = \PhpOffice\PhpSpreadsheet\IOFactory::createReader('Xlsx')->load($filePath);
     $worksheet = $data->getActiveSheet();
+    
     $rows = $worksheet->toArray();
 
     // Remove the header row
     $header = array_shift($rows);
 
-    // Insert data into donnees_tickets table
+    // // Insert data into donnees_tickets table
     $stmtTickets = $db->prepare("INSERT INTO donnees_tickets (id_fichier, Compte, NTICKET, CPROD, TYPE_TCK, DATOP_TCK, SENS, MTN_TCK, KTCK) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
 
     foreach ($rows as $row) {
         $stmtTickets->bindParam(1, $idFichier);
@@ -318,70 +349,6 @@ try {
 
     echo "Données insérées avec succès.";
 
-    // Créez un classeur (spreadsheet) et chargez le fichier Excel
-    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
-
-    // Spécifiez le chemin du fichier CSV
-    $CSVfileName = 'Tickets_SMS_PLUS_Bis_' . $lastDate . '.csv';
-    $CSVfilePath = '/home/moranta/Downloads/output/' . $CSVfileName;
-
-    // Créez un écrivain (writer) pour le classeur au format CSV
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
-    $writer->setDelimiter(';');
-    $writer->setEnclosure('"');
-    $writer->setLineEnding("\r\n");
-    $writer->setSheetIndex(0);
-
-    // Enregistrez le classeur au format CSV
-    $writer->save($CSVfilePath);
-
-    
-    // // Read the file contents as binary data
-    // $fileContent = file_get_contents($filePath);
-    
-    // // Requête SQL préparée pour l'insertion
-    // $stmt = $db->prepare("INSERT INTO archive_ticket (nom_fichier, donnee_fichier, date_creation) VALUES (?,?,NOW())");
-    // // Exécution de la requête avec les valeurs spécifiées
-    // $stmt->bindParam(1, $fileName);
-    // $stmt->bindParam(2, $filePath, PDO::PARAM_LOB);
-    // $stmt->execute();
-
-    // echo "Données insérées avec succès.";
-    
-
-    // $date = new DateTime();
-    // $queryFile = $db->prepare($sql);
-    // $resultFile = $queryFile->execute([$fileContent, $date->format('Y-m-d')]);
-    
-    // Optionally, you can delete the file from the server after inserting into the database
-    // unlink($filePath);
-
-
-    // // Fetch all files from the database
-    // $sql = "SELECT id_fichier, nom_fichier FROM archives";
-    // $query = $db->query($sql);
-    // $files = $query->fetchAll(PDO::FETCH_ASSOC);
-    // print_r($files);
-
-    // // Specify the directory where you want to save the files
-    // $saveDirectory = '/home/moranta/Downloads/output/';  // Replace with the actual directory
-
-    // foreach ($files as $file) {
-    //     // Create a unique filename based on the file ID
-    //     $localFileName = $saveDirectory . 'file_' . $file['id_fichier'] . '.xlsx';
-
-    //     // Save the file locally
-    //     file_put_contents($localFileName, $file['nom_fichier'], LOCK_EX);
-    // }
-
-    
-
-
-    // $data = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileName);
-
-    //Utilise ce code pour changer le format de la date
-    // $arr        =   explode('-',$date);
-    // $newDate    =   $arr[2].'-'.$arr[1].'-'.$arr[0];
 
 } catch (Exception $e) {
     echo $e->getMessage();
