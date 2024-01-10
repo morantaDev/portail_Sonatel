@@ -428,7 +428,7 @@
                         <h2>Liste des partenaires</h2>
                         <thead>
                             <tr>
-                                <th class="id_client">COMPTE</th>
+                                <th class="compte">COMPTE</th>
                                 <th class="nom_client"><i class="bi bi-person"></i>PARTENAIRE</th>
                                 <th class="action">Action</th>
                             </tr>
@@ -529,28 +529,34 @@
                 <div class="full_stat" style="background-color: black; width: 97%; height: 100%;">
                     <h2 style="color: white; text-align: center; padding-top: 30px; font-size: 40px">Statistiques</h2>
                     
-                    <h4 style="color: white; padding-bottom: 20px; padding-left: 30px;">Numéro de compte: <Strong>WTS02543</Strong></h4>
+                    <h4 style="color: white; padding-bottom: 20px; padding-left: 30px;">Numéro de compte: <Strong class="numeroCompte">WTS02543</Strong></h4>
                     
                     <h5 style="color: white; padding-bottom: 20px; padding-left: 30px;">Date du ticket: <strong>31 Décembre 2023</strong></h4>
                     <!-- Display all statistics here -->
-                    <div class="stat_content" style="display: flex; align-content: center; width: 100%; border: 1px solid red; padding-left: 25%">
+                    <div class="stat_content" style="display: flex; align-content: center; width: 100%; border: 1px solid red; padding-left: 10%">
                         <div class="card text-bg-secondary mb-3" style="max-width: 18rem; margin-right: 5%;">
                             <div class="card-header">Nombre SMS National</div>
                             <div class="card-body">
-                                <h5 class="card-title" style="text-align: center; font-size: 40px;">345</h5>
+                                <h5 class="card-title_national" style="text-align: center; font-size: 40px;">345</h5>
                                 <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                             </div>
                         </div>
                         <div class="card text-bg-success mb-3" style="max-width: 18rem; margin-right: 5%">
                             <div class="card-header">Nombre SMS international</div>
                             <div class="card-body">
-                                <h5 class="card-title" style="text-align: center; font-size: 40px;">3456</h5>
+                                <h5 class="card-title_international" style="text-align: center; font-size: 40px;">3456</h5>
                             </div>
                         </div>
                         <div class="card text-bg-danger mb-3" style="max-width: 18rem; margin-right: 5%">
-                        <div class="card-header">Montant Ticket</div>
+                        <div class="card-header">Montant Ticket National</div>
                         <div class="card-body">
-                            <h5 class="card-title" style="text-align: center; font-size: 40px;">1320000</h5>
+                            <h5 class="card-title_montantNat" style="text-align: center; font-size: 40px;">1320000</h5>
+                        </div>
+                        </div>
+                        <div class="card text-bg-danger mb-3" style="max-width: 18rem; margin-right: 5%">
+                        <div class="card-header">Montant Ticket International</div>
+                        <div class="card-body">
+                            <h5 class="card-title_montantInt" style="text-align: center; font-size: 40px;">1320000</h5>
                         </div>
                         </div>
                     </div>
@@ -768,26 +774,68 @@
         $(".show_stat").on('click', function(){
             $(".table-client").hide();
             $(".table-statistiques").show();
-            var nomClient = $(this).parent().data("class");
+            var row = $(this).closest("tr"); // Récupérer la ligne parente
+            var compte = row.find("td:eq(0)").text();
+
+
+            $('.numeroCompte').html(compte);
+
+            alert(compte);
             $.ajax({
                 url: "statistiques.php",
                 type: "POST",
-                data: {nomClient: nomClient},
+                dataType: 'json',
+                data: {compte: compte},
                 success: function(response){
-                    alert(response);
+                    // alert(response);
+                    alert(response[1]);
+                    if(response.length > 1){
+                        for(let i=0; i < response.length; i++){
+                            if(i===0){
+                                var montant = response[0]["mtn_tck"].match(/\d+/g);
+                                var ktck = response[0]["ktck"].match(/\d+/g);
+                                console.log(montant);
+                                $(".card-body .card-title_international").html(montant);
+                                $('.card-body .card-title_montantInt').html(montant);
+    
+                            }else if(i===1){
+                                var ktck = response[1]["ktck"].match(/\d+/g);
+                                var montant = response[1]["mtn_tck"].match(/\d+/g);
+                                $(".card-body .card-title_national").html(ktck);
+                                $('.card-body .card-title_montantNat').html(montant);
+                            } else {
+                                $(".card-body .card-title_national").html(0);
+                                $(".card-body .card-title_international").html(0);
+                                $('.card-body .card-title_montantNat').html(0);
+                                $('.card-body .card-title_montantInt').html(0);
+    
+                            }
+                        }
+                    }else{
+                        var ktck = response[0]["ktck"].match(/\d+/g);
+                        var montant = response[0]["mtn_tck"].match(/\d+/g);
+                        $(".card-body .card-title_national").html(ktck);
+                            $(".card-body .card-title_international").html(0);
+                            $('.card-body .card-title_montantNat').html(montant);
+                            $('.card-body .card-title_montantInt').html(0);
+                    }
                 },
                 error: function(){
                     console.log("Erreur lors d'une tentative d'affichage de la page statistique");
                 }
-            })
-
+            });
         });
+
+        //});
 
         $(".table-statistiques button").on('click', function(){
             $(".table-statistiques").hide();
             $(".table-client").show();
         });
 
+        $(".card-body .card-title_national").on('click', function(){
+            $(".card-body .card-title_national").html(0);
+        })
 
         // Data Picker Initialization
         $(function(){

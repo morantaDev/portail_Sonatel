@@ -35,7 +35,7 @@ foreach ($selectedClients as $client) {
     $html .= '<tr>';
     $html .= '<td>' . $client['compte'] . '</td>';
     $html .= '<td><strong>' . strtoupper($client['nomclient']) . '</strong></td>';
-    $html .= "<td style='display:flex;' data-class='".$client['nomclient']."'><i class='bi bi-eye' style='' title='voir stat'><i class='bi bi-pencil-square edit_client' title='modifier partenaire'></i><i class='bi bi-save save_client' title='enregistrer modif'></i><i class='bi bi-trash3-fill delete_client' title='supprimer partenaire'></i></td>";
+    $html .= "<td style='display:flex;' data-class='".$client['nomclient']."'><i class='bi bi-eye show_stat' style='' title='voir stat'><i class='bi bi-pencil-square edit_client' title='modifier partenaire'></i><i class='bi bi-save save_client' title='enregistrer modif'></i><i class='bi bi-trash3-fill delete_client' title='supprimer partenaire'></i></td>";
 
 
     $html .= '</tr>';
@@ -131,5 +131,58 @@ generatePagination($totalPages, $currentPage);
                     console.log('Erreur lors de la tentative de suppression du client.');
                 }
             });
+        });
+
+        $(".show_stat").on('click', function(){
+            $(".table-client").hide();
+            $(".table-statistiques").show();
+            var row = $(this).closest("tr"); // Récupérer la ligne parente
+            var compte = row.find("td:eq(0)").text();
+
+
+            $('.numeroCompte').html(compte);
+
+            alert(compte);
+            $.ajax({
+                url: "statistiques.php",
+                type: "POST",
+                dataType: 'json',
+                data: {compte: compte},
+                success: function(response){
+                    // alert(response);
+                    alert(response[1]);
+                    if(response.length > 1){
+                        for(let i=0; i < response.length; i++){
+                            if(i===0){
+                                $(".card-body .card-title_international").html(response[0]["ktck"]);
+                                $('.card-body .card-title_montantInt').html(response[0]["mtn_tck"]);
+    
+                            }else if(i===1){
+                                $(".card-body .card-title_national").html(response[1]["ktck"]);
+                                $('.card-body .card-title_montantNat').html(response[1]["mtn_tck"]);
+                            } else {
+                                $(".card-body .card-title_national").html(0);
+                                $(".card-body .card-title_international").html(0);
+                                $('.card-body .card-title_montantNat').html(0);
+                                $('.card-body .card-title_montantInt').html(0);
+    
+                            }
+                        }
+                    }else{
+                        $(".card-body .card-title_national").html(response[0]["ktck"]);
+                            $(".card-body .card-title_international").html(0);
+                            $('.card-body .card-title_montantNat').html(response[0]["mtn_tck"]);
+                            $('.card-body .card-title_montantInt').html(0);
+                    }
+                },
+                error: function(){
+                    console.log("Erreur lors d'une tentative d'affichage de la page statistique");
+                }
+            });
+        });
+
+        $(".table-statistiques button").on('click', function(){
+            $(".table-statistiques").hide();
+            $(".table-client").show();
         });
 </script>
