@@ -533,7 +533,7 @@
                     
                     <h5 style="color: white; padding-bottom: 20px; padding-left: 30px;">Date du ticket: <strong>31 Décembre 2023</strong></h4>
                     <!-- Display all statistics here -->
-                    <div class="stat_content" style="display: flex; align-content: center; width: 100%; border: 1px solid red; padding-left: 10%">
+                    <div class="stat_content" style="display: flex; align-content: center; width: 100%; border: 1px solid red; padding-left: 17%">
                         <div class="card text-bg-secondary mb-3" style="max-width: 18rem; margin-right: 5%;">
                             <div class="card-header">Nombre SMS National</div>
                             <div class="card-body">
@@ -789,18 +789,29 @@
                 success: function(response){
                     // alert(response);
                     alert(response[1]);
-                    if(response.length > 1){
-                        for(let i=0; i < response.length; i++){
-                            if(i===0){
-                                var montant = response[0]["mtn_tck"].match(/\d+/g);
-                                var ktck = response[0]["ktck"].match(/\d+/g);
+                    if (response.length > 1) {
+                        for (let i = 0; i < response.length; i++) {
+                            if (i === 0) {
+                                var montant = response[0]["mtn_tck"];
+                                var ktck = response[0]["ktck"];
+                                if (typeof montant === "string") {
+                                    montant = montant.match(/\d+/g);
+                                }
+                                if (typeof ktck === "string") {
+                                    ktck = ktck.match(/\d+/g);
+                                }
                                 console.log(montant);
-                                $(".card-body .card-title_international").html(montant);
+                                $(".card-body .card-title_international").html(ktck);
                                 $('.card-body .card-title_montantInt').html(montant);
-    
-                            }else if(i===1){
-                                var ktck = response[1]["ktck"].match(/\d+/g);
-                                var montant = response[1]["mtn_tck"].match(/\d+/g);
+                            } else if (i === 1) {
+                                var ktck = response[1]["ktck"];
+                                var montant = response[1]["mtn_tck"];
+                                if (typeof ktck === "string") {
+                                    ktck = ktck.match(/\d+/g);
+                                }
+                                if (typeof montant === "string") {
+                                    montant = montant.match(/\d+/g);
+                                }
                                 $(".card-body .card-title_national").html(ktck);
                                 $('.card-body .card-title_montantNat').html(montant);
                             } else {
@@ -808,17 +819,23 @@
                                 $(".card-body .card-title_international").html(0);
                                 $('.card-body .card-title_montantNat').html(0);
                                 $('.card-body .card-title_montantInt').html(0);
-    
                             }
                         }
-                    }else{
-                        var ktck = response[0]["ktck"].match(/\d+/g);
-                        var montant = response[0]["mtn_tck"].match(/\d+/g);
+                    } else {
+                        var ktck = response[0]["ktck"];
+                        var montant = response[0]["mtn_tck"];
+                        if (typeof ktck === "string") {
+                            ktck = ktck.match(/\d+/g);
+                        }
+                        if (typeof montant === "string") {
+                            montant = montant.match(/\d+/g);
+                        }
                         $(".card-body .card-title_national").html(ktck);
-                            $(".card-body .card-title_international").html(0);
-                            $('.card-body .card-title_montantNat').html(montant);
-                            $('.card-body .card-title_montantInt').html(0);
+                        $(".card-body .card-title_international").html(0);
+                        $('.card-body .card-title_montantNat').html(montant);
+                        $('.card-body .card-title_montantInt').html(0);
                     }
+
                 },
                 error: function(){
                     console.log("Erreur lors d'une tentative d'affichage de la page statistique");
