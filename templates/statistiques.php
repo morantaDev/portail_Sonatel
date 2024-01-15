@@ -14,11 +14,12 @@
 
         if (!empty($_POST) && $_SERVER["REQUEST_METHOD"] === 'POST') {
             $compte = trim($_POST["compte"]);
+            $date = trim($_POST["date"]);
 
-            $sql = "SELECT * from donnees_tickets WHERE compte = ? LIMIT 2";
+            $sql = "SELECT * FROM donnees_tickets WHERE compte = ? AND datop_tck = ? LIMIT 2";
 
             $query = $db->prepare($sql);
-            $query->execute([$compte]);
+            $query->execute([$compte, $date]);
             $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
             // print_r($result);

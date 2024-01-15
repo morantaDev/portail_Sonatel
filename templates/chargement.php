@@ -177,6 +177,10 @@ try {
 
                     $worksheet = $spreadsheet->getSheetByName("Feuil1");
                     $highestColumn = $worksheet->getHighestDataColumn();
+                    // Supprimer tous les enregistrements existants
+                    $deleteExistingRecords = $db->prepare("DELETE FROM catalogue");
+                    $deleteExistingRecords->execute();
+                    
                     $insertCatalogue = $db->prepare("INSERT INTO catalogue (type, code, tarif, ktck) VALUES (?, ?, ?, ?)");
                     $ExistingCode = $db->prepare("SELECT COUNT(*) AS count FROM catalogue WHERE code = ?");
 
@@ -194,8 +198,14 @@ try {
                     
                     $worksheet1 = $spreadsheet->getSheetByName("engagements");
                     $highestColumn1 = $worksheet1->getHighestDataColumn();
+
+                    // Supprimer tous les enregistrements existants
+                    $deleteExistingRecords = $db->prepare("DELETE FROM osm");
+                    $deleteExistingRecords->execute();
+                            
                     $insertEngagement = $db->prepare("INSERT INTO osm (compte, trafic_associe, montant) VALUES (?, ?, ?)");
                     // $UpdateCatalogue= $db->prepare("UPDATE offre_sur_mesure SET indicateur_osm=?;");
+
                     
                     foreach ($worksheet1->getRowIterator() as $index => $row){
                         if ($index === 1) {
@@ -215,38 +225,60 @@ try {
 
                     //Recupérer le fichier catalogue aggregateur contenant les nouveaux tarifs
                 } elseif (str_contains($emplacementDestination, "nouveaux_tarifs")){
-                    $excelFilePath = $emplacementDestination;
-                    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFilePath);
-                    $catalogueAggSheet = $spreadsheet->getActiveSheet();
-                    $highestColumn = $catalogueAggSheet->getHighestDataColumn();
-
-                    // Requête pour insérer le fichier au niveau de la base de données
-                    $queryAggr = $db->prepare("INSERT INTO catalogue_aggregateur (paliers, tarif_on_net, tarif_off_net) VALUES (?, ?, ?)");
-
-                    // Préparez la requête de vérification si le client existe déjà
-                    $CatalogAggrExists = $db->prepare("SELECT COUNT(*) AS count FROM catalogue_aggregateur WHERE paliers = ? AND tarif_on_net = ? AND tarif_off_net = ?");
-
-                    foreach ($catalogueAggSheet->getRowIterator() as $index => $row) {
-                        if ($index === 1) {
-                            continue;
-                        }
-                        $rowData = $catalogueAggSheet->rangeToArray('A' . $row->getRowIndex() . ':' . $highestColumn . $row->getRowIndex(), null, true, false);
-
-                        // Exécutez la requête pour vérifier si l'enregistrement existe
-                        $CatalogAggrExists->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2]]);
-
-                        // Récupérez le résultat
-                        $count = $CatalogAggrExists->fetchColumn();
-
-                        if ($count > 0) {
-                            // Le nom du client existe déjà
-                            echo "Le fichier catalogue que vous essayez de charger existe déjà dans la base de données.";
-                        } else {
-                            // Le nom du client n'existe pas encore, donc l'insérer
+                        $excelFilePath = $emplacementDestination;
+                        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFilePath);
+                        $catalogueAggSheet = $spreadsheet->getActiveSheet();
+                        $highestColumn = $catalogueAggSheet->getHighestDataColumn();
+        
+                        // Supprimer tous les enregistrements existants
+                        $deleteExistingRecords = $db->prepare("DELETE FROM catalogue_aggregateur");
+                        $deleteExistingRecords->execute();
+        
+                        // Insérer les nouvelles données du fichier
+                        $queryAggr = $db->prepare("INSERT INTO catalogue_aggregateur (paliers, tarif_on_net, tarif_off_net) VALUES (?, ?, ?)");
+        
+                        foreach ($catalogueAggSheet->getRowIterator() as $index => $row) {
+                            if ($index === 1) {
+                                continue;
+                            }
+                            $rowData = $catalogueAggSheet->rangeToArray('A' . $row->getRowIndex() . ':' . $highestColumn . $row->getRowIndex(), null, true, false);
+        
+                            // Insérer les nouvelles données
                             $queryAggr->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2]]);
                         }
-                    }
-                    echo "Importation réussie.";
+                        echo "Importation réussie.";
+                    // $excelFilePath = $emplacementDestination;
+                    // $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($excelFilePath);
+                    // $catalogueAggSheet = $spreadsheet->getActiveSheet();
+                    // $highestColumn = $catalogueAggSheet->getHighestDataColumn();
+
+                    // // Requête pour insérer le fichier au niveau de la base de données
+                    // $queryAggr = $db->prepare("INSERT INTO catalogue_aggregateur (paliers, tarif_on_net, tarif_off_net) VALUES (?, ?, ?)");
+
+                    // // Préparez la requête de vérification si le client existe déjà
+                    // $CatalogAggrExists = $db->prepare("SELECT COUNT(*) AS count FROM catalogue_aggregateur WHERE paliers = ? AND tarif_on_net = ? AND tarif_off_net = ?");
+
+                    // foreach ($catalogueAggSheet->getRowIterator() as $index => $row) {
+                    //     if ($index === 1) {
+                    //         continue;
+                    //     }
+                    //     $rowData = $catalogueAggSheet->rangeToArray('A' . $row->getRowIndex() . ':' . $highestColumn . $row->getRowIndex(), null, true, false);
+
+                    //     // Exécutez la requête pour vérifier si l'enregistrement existe
+                    //     $CatalogAggrExists->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2]]);
+
+                    //     // Récupérez le résultat
+                    //     $count = $CatalogAggrExists->fetchColumn();
+
+                    //     if ($count > 0) {
+                    //         // Le nom du client existe déjà
+                    //         echo "Le fichier catalogue que vous essayez de charger existe déjà dans la base de données.";
+                    //     } else {
+                    //         // Le nom du client n'existe pas encore, donc l'insérer
+                    //         $queryAggr->execute([$rowData[0][0], $rowData[0][1], $rowData[0][2]]);
+                    //     }
+                    // }
+                    // echo "Importation réussie.";
 
                 } elseif (str_contains($emplacementDestination, 'billing_aggre')){
                     //ajouter le code içi

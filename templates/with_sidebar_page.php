@@ -73,7 +73,7 @@
         margin: 0;
         width: 100%;
         height: 100vh;
-        background-color: none; /* Couleur de fond de la page */
+        background-color: rgb(220,220,220); /* Couleur de fond de la page */
         /*margin: 20px;  Supprime la marge par défaut du body */
         font-family: Arial, sans-serif; /* Police de caractères */
     }
@@ -183,11 +183,11 @@
         border-radius: 50%;
     }
     .logo img{
-        margin-top: 10px;
+        margin-top: 2px;
     }
     .header-container{
         width: 100%; 
-        height: 79px; 
+        height: 85px; 
         left: 0px; 
         top: 0px; 
         position: fixed; 
@@ -229,7 +229,7 @@
     .connectUser{
         position: relative;
         /* border: 1px solid black; */
-        left: 50%;
+        left: 5%;
         display: flex;
         width: 15%;
         top: -2px;
@@ -254,10 +254,10 @@
     }
 
     .userName a{
-        color: red;
+        color: white;
     }
     .userName span{
-        color: white;
+        color: rgb(255,140,0);
         font-size: 20px;
     }
     .getFiles{
@@ -286,8 +286,8 @@
         /* transition: left 0s; */
     }
     .table-fichiersTraites th{
-        background-color: rgb(255,140,0);
-        color: #fff;
+        background-color: black;
+        color: rgb(255,140,0);
         text-align: center;
         font-size: 18px;
     }
@@ -318,8 +318,8 @@
     }
 
     .table-client th, .table-Historiques th {
-        background-color: rgb(255,140,0);
-        color: #fff;
+        background-color: black;
+        color: rgb(255,140,0);
         text-align: center;
         font-size: 18px;
     }
@@ -361,6 +361,21 @@
     .table-statistiques button{
         color: red;
     }
+    .header_items{
+        color: white;
+        width: 70%;
+    }
+    .header_items ul{
+        display: flex;
+        padding-top: 30px;
+        padding-left: 60%;
+    }
+    .header_items li{
+        list-style: none;
+        padding: 0 5%;
+        font-size: 20px;
+        color: rgb(255,140,0);
+    }
     
 </style>
 </head>
@@ -369,15 +384,22 @@
 <div class="header-container">
     <div class="search_input input-group rounded" style="display: flex;">
         <div class="logo">
-            <img src="../assets/sonatel_orange_sans_fond.png" alt="">
+            <img src="../assets/sonatel_orange_sans_fond.png" alt="" style="height: 80px;">
         </div>
-        <div class="search">
+        <!-- <div class="search">
             <input type="search" class="form-control rounded-left" placeholder="Recherche" aria-label="Search" aria-describedby="search-addon" />
             <span class="input-group-text border-0" id="search-addon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16" style="color: white;">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                 </svg>
             </span>
+        </div> -->
+        <div class="header_items">
+            <ul>
+                <li>Accueil</li>
+                <li>A propos</li>
+                <li>Contact</li>
+            </ul>
         </div>
 
         <!-- User connect -->
@@ -425,7 +447,7 @@
             <div class="col-md-10">
                 <div class="table-client" id="table-client">
                     <table class="table table-bordered">
-                        <h2>Liste des partenaires</h2>
+                        <h2><strong>Liste des partenaires</strong></h2>
                         <thead>
                             <tr>
                                 <th class="compte">COMPTE</th>
@@ -459,7 +481,7 @@
             <div class="col-md-12">
                 <div class="table-fichiersTraites">
                     <table class="table table-bordered">
-                        <h2>Liste des fichiers traités</h2>
+                        <h2><strong>Liste des fichiers traités</strong></h2>
                         <thead>
                             <tr>
                                 <th class="id_fichier">Id Fichiers</th>
@@ -492,7 +514,7 @@
             <div class="col-md-12">
                 <div class="table-Historiques">
                     <table class="table table-bordered">
-                        <h2>Historiques</h2>
+                        <h2><strong>Historiques</strong></h2>
                         <thead>
                             <tr>
                                 <th class="id_historiqque">Action</th>
@@ -517,46 +539,46 @@
             <!-- Display statistics of any client here -->
             <div class="col-md-12">
                 <div class="table-statistiques">
-                    <button style="padding: 7px 25px; font-size: 20px; border-radius: 10%; color: black; background-color: rgb(255,140,0); font-weight: bold;"><i class="bi bi-arrow-left"></i>RETOUR</button>
+                    <button class='retour' style="padding: 7px 25px; font-size: 20px; border-radius: 10%; color: black; background-color: rgb(255,140,0); font-weight: bold;"><i class="bi bi-arrow-left"></i>RETOUR</button>
 
                     <!-- Search any user compte stat and display it -->
                     <div class="row">
                         <div class="col-sm-12" align="center">
-                            <p style="font-size: 30px; padding-bottom: 20px"><input type="text" id="datepicker" style="margin-right:15px;" placeholder="Choisir une date"><button style="background-color: black; color: white; margin-left: -20px; margin-top: 10%;">Recherche</button></p>
+                            <p style="font-size: 30px; padding-bottom: 20px"><input type="text" id="datepicker" style="margin-right:15px;" placeholder="Choisir une date" class="date_stat"><button style="background-color: black; color: white; margin-left: -20px; margin-top: 10%;" class="actualiser">Actualiser</button></p>
                         </div>            
                     </div>
 
                 <div class="full_stat" style="background-color: black; width: 97%; height: 100%;">
                     <h2 style="color: white; text-align: center; padding-top: 30px; font-size: 40px">Statistiques</h2>
                     
-                    <h4 style="color: white; padding-bottom: 20px; padding-left: 30px;">Numéro de compte: <Strong class="numeroCompte">WTS02543</Strong></h4>
+                    <h4 style="color: white; padding-bottom: 20px; padding-left: 30px;">Numéro de compte: <Strong class="numeroCompte"></Strong></h4>
                     
-                    <h5 style="color: white; padding-bottom: 20px; padding-left: 30px;">Date du ticket: <strong>31 Décembre 2023</strong></h4>
+                    <h5 style="color: white; padding-bottom: 20px; padding-left: 30px;">Date du ticket: <strong class="date_ticket"></strong></h4>
                     <!-- Display all statistics here -->
                     <div class="stat_content" style="display: flex; align-content: center; width: 100%; border: 1px solid red; padding-left: 17%">
                         <div class="card text-bg-secondary mb-3" style="max-width: 18rem; margin-right: 5%;">
                             <div class="card-header">Nombre SMS National</div>
                             <div class="card-body">
-                                <h5 class="card-title_national" style="text-align: center; font-size: 40px;">345</h5>
+                                <h5 class="card-title_national" style="text-align: center; font-size: 40px;">0</h5>
                                 <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                             </div>
                         </div>
                         <div class="card text-bg-success mb-3" style="max-width: 18rem; margin-right: 5%">
                             <div class="card-header">Nombre SMS international</div>
                             <div class="card-body">
-                                <h5 class="card-title_international" style="text-align: center; font-size: 40px;">3456</h5>
+                                <h5 class="card-title_international" style="text-align: center; font-size: 40px;">0</h5>
                             </div>
                         </div>
                         <div class="card text-bg-danger mb-3" style="max-width: 18rem; margin-right: 5%">
                         <div class="card-header">Montant Ticket National</div>
                         <div class="card-body">
-                            <h5 class="card-title_montantNat" style="text-align: center; font-size: 40px;">1320000</h5>
+                            <h5 class="card-title_montantNat" style="text-align: center; font-size: 40px;">0</h5>
                         </div>
                         </div>
                         <div class="card text-bg-danger mb-3" style="max-width: 18rem; margin-right: 5%">
                         <div class="card-header">Montant Ticket International</div>
                         <div class="card-body">
-                            <h5 class="card-title_montantInt" style="text-align: center; font-size: 40px;">1320000</h5>
+                            <h5 class="card-title_montantInt" style="text-align: center; font-size: 40px;">0</h5>
                         </div>
                         </div>
                     </div>
@@ -597,26 +619,31 @@
                 $(".table-client").hide(); // Masquer le tableau des clients
                 $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
                 $(".table-Historiques").hide(); //Masquer la table des historiques 
+                $(".table-statistiques").hide();
             } else if (selected_item === 'Gestion Partenaires') {
                 $(".getFiles").hide();
                 $(".table-client").show(); // Afficher la table des clients
                 $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités
                 $(".table-Historiques").hide(); //Masquer la table des historiques 
+                $(".table-statistiques").hide();
             } else if (selected_item === 'Fichiers traités') {
                 $(".getFiles").hide();
                 $(".table-client").hide(); // Afficher la table des clients
                 $(".table-fichiersTraites").show(); //Masquer la table des fichiers traités
                 $(".table-Historiques").hide(); //Masquer la table des historiques 
+                $(".table-statistiques").hide();
             } else if (selected_item === 'Historiques'){
                 $(".getFiles").hide();
                 $(".table-client").hide(); // Afficher la table des clients
                 $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités        }
                 $(".table-Historiques").show(); //Masquer la table des historiques 
+                $(".table-statistiques").hide();
             }else {
                 $(".getFiles").hide();
                 $(".table-client").hide(); // Afficher la table des clients
                 $(".table-fichiersTraites").hide(); //Masquer la table des fichiers traités        }
-                $(".table-Historiques").hide(); //Masquer la table des historiques 
+                $(".table-Historiques").hide(); //Masquer la table des historiques
+                $(".table-statistiques").hide(); 
             }
         });
 
@@ -778,74 +805,103 @@
             var compte = row.find("td:eq(0)").text();
 
 
+            //Get the date to update the stats
+            var date_to_updateStat = "";
+            var date_to_updateStat1 = "";
+            $('input').on('change', function(){
+                date_to_updateStat = $('.date_stat').val();
+
+                // alert(date_to_updateStat);
+
+                var split_date = date_to_updateStat.split('/');
+
+                date_to_updateStat = split_date[2] + '-' + split_date[0] + '-' + split_date[1]
+
+                date_to_updateStat1 = split_date[1] + '-' + split_date[0] + '-' + split_date[2]
+                // alert(date_to_updateStat);
+
+                $('.date_ticket').html(date_to_updateStat1);
+            })
+
             $('.numeroCompte').html(compte);
 
-            alert(compte);
-            $.ajax({
-                url: "statistiques.php",
-                type: "POST",
-                dataType: 'json',
-                data: {compte: compte},
-                success: function(response){
-                    // alert(response);
-                    alert(response[1]);
-                    if (response.length > 1) {
-                        for (let i = 0; i < response.length; i++) {
-                            if (i === 0) {
-                                var montant = response[0]["mtn_tck"];
-                                var ktck = response[0]["ktck"];
-                                if (typeof montant === "string") {
-                                    montant = montant.match(/\d+/g);
-                                }
-                                if (typeof ktck === "string") {
-                                    ktck = ktck.match(/\d+/g);
-                                }
-                                console.log(montant);
-                                $(".card-body .card-title_international").html(ktck);
-                                $('.card-body .card-title_montantInt').html(montant);
-                            } else if (i === 1) {
-                                var ktck = response[1]["ktck"];
-                                var montant = response[1]["mtn_tck"];
-                                if (typeof ktck === "string") {
-                                    ktck = ktck.match(/\d+/g);
-                                }
-                                if (typeof montant === "string") {
-                                    montant = montant.match(/\d+/g);
-                                }
-                                $(".card-body .card-title_national").html(ktck);
-                                $('.card-body .card-title_montantNat').html(montant);
-                            } else {
-                                $(".card-body .card-title_national").html(0);
-                                $(".card-body .card-title_international").html(0);
-                                $('.card-body .card-title_montantNat').html(0);
-                                $('.card-body .card-title_montantInt').html(0);
-                            }
-                        }
-                    } else {
-                        var ktck = response[0]["ktck"];
-                        var montant = response[0]["mtn_tck"];
-                        if (typeof ktck === "string") {
-                            ktck = ktck.match(/\d+/g);
-                        }
-                        if (typeof montant === "string") {
-                            montant = montant.match(/\d+/g);
-                        }
-                        $(".card-body .card-title_national").html(ktck);
-                        $(".card-body .card-title_international").html(0);
-                        $('.card-body .card-title_montantNat').html(montant);
-                        $('.card-body .card-title_montantInt').html(0);
-                    }
+            $('.actualiser').on('click', function(){
 
-                },
-                error: function(){
-                    console.log("Erreur lors d'une tentative d'affichage de la page statistique");
-                }
-            });
+    
+                alert('hello');
+                $.ajax({
+                    url: "statistiques.php",
+                    type: "POST",
+                    dataType: 'json',
+                    data: {compte: compte, date: date_to_updateStat},
+                    success: function(response){
+                        // alert(response);
+                        // alert(response[1]);
+                        if (response.length > 1) {
+                            for (let i = 0; i < response.length; i++) {
+                                if (i === 0) {
+                                    var montant = response[0]["mtn_tck"];
+                                    var ktck = response[0]["ktck"];
+                                    if (typeof montant === "string") {
+                                        montant = montant.match(/\d+/g);
+                                    }
+                                    if (typeof ktck === "string") {
+                                        ktck = ktck.match(/\d+/g);
+                                    }
+                                    console.log(montant);
+                                    $(".card-body .card-title_international").html(ktck);
+                                    $('.card-body .card-title_montantInt').html(montant);
+                                } else if (i === 1) {
+                                    var ktck = response[1]["ktck"];
+                                    var montant = response[1]["mtn_tck"];
+                                    if (typeof ktck === "string") {
+                                        ktck = ktck.match(/\d+/g);
+                                    }
+                                    if (typeof montant === "string") {
+                                        montant = montant.match(/\d+/g);
+                                    }
+                                    $(".card-body .card-title_national").html(ktck);
+                                    $('.card-body .card-title_montantNat').html(montant);
+                                } else {
+                                    $(".card-body .card-title_national").html(0);
+                                    $(".card-body .card-title_international").html(0);
+                                    $('.card-body .card-title_montantNat').html(0);
+                                    $('.card-body .card-title_montantInt').html(0);
+                                }
+                            }
+                        } else if (response.length === 1){
+                            var ktck = response[0]["ktck"];
+                            var montant = response[0]["mtn_tck"];
+                            if (typeof ktck === "string") {
+                                ktck = ktck.match(/\d+/g);
+                            }
+                            if (typeof montant === "string") {
+                                montant = montant.match(/\d+/g);
+                            }
+                            $(".card-body .card-title_national").html(ktck);
+                            $(".card-body .card-title_international").html(0);
+                            $('.card-body .card-title_montantNat').html(montant);
+                            $('.card-body .card-title_montantInt').html(0);
+                        } else {
+                            $(".card-body .card-title_national").html(0);
+                            $(".card-body .card-title_international").html(0);
+                            $('.card-body .card-title_montantNat').html(0);
+                            $('.card-body .card-title_montantInt').html(0);
+                        }
+    
+                    },
+                    error: function(){
+                        console.log("Erreur lors d'une tentative d'affichage de la page statistique");
+                    }
+                });
+
+
+            })
         });
 
         //});
 
-        $(".table-statistiques button").on('click', function(){
+        $(".table-statistiques .retour").on('click', function(){
             $(".table-statistiques").hide();
             $(".table-client").show();
         });
