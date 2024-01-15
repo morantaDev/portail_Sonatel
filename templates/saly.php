@@ -8,14 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sélection de Fichier</title>
     <style>
-        body {
-            background-color: beige; /* Couleur de fond de la page */
-            /*margin: 20px;  Supprime la marge par défaut du body */
-            font-family: Arial, sans-serif; /* Police de caractères */
-        }
 
         .saly {
-            background-color: #d2b48c; /* Couleur de fond de la div */
+            background-color: black; /* Couleur de fond de la div */
             padding: 20px; /* Espace intérieur de la div */
             margin: 50px auto; /* Centrer la div */
             border-radius: 10px; /* Coins arrondis de la div */
@@ -29,10 +24,10 @@
         }
 
         label {
-            background-color: #ffa07a; /* Couleur de fond du label (forme) */
+            background-color: rgb(255,140,0); /* Couleur de fond du label (forme) */
             padding: 10px; /* Espace intérieur du label (forme) */
             border-radius: 5px; /* Coins arrondis du label (forme) */
-            color: white; /* Couleur du texte du label (forme) */
+            color: black; /* Couleur du texte du label (forme) */
             cursor: pointer; /* Curseur pointer pour indiquer qu'il est cliquable */
         }
 
